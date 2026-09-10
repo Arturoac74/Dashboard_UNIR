@@ -29,7 +29,11 @@
         .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .panel { background-color: #1e293b; border-radius: 12px; padding: 25px; border: 1px solid #334155; overflow: hidden; }
         .panel.full { grid-column: span 2; }
-        .panel h2 { font-size: 15px; margin-top: 0; font-weight: 600; color: #e2e8f0; margin-bottom: 15px; }
+        
+        /* ESTILOS DE TÍTULOS Y SUBTÍTULOS EJECUTIVOS */
+        .panel h2 { font-size: 16px; margin-top: 0; font-weight: 600; color: #f8fafc; margin-bottom: 4px; }
+        .panel-subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 15px; font-weight: 400; }
+        
         .panel-description { font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; padding: 12px 15px; background-color: #0f172a; border-left: 3px solid #38bdf8; border-radius: 0 8px 8px 0; }
         
         #chart-map { width: 100%; height: 420px; }
@@ -50,7 +54,6 @@
         .quadrant-bg { fill: transparent; stroke: #334155; stroke-dasharray: 5,5; stroke-width: 1px; }
         .quadrant-label { fill: #475569; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- MEDIA QUERIES PARA RESPONSIVIDAD (TABLET & MÓVIL) --- */
         @media (max-width: 1024px) { 
             .dashboard { grid-template-columns: 1fr; } 
             .panel.full { grid-column: span 1; } 
@@ -58,12 +61,12 @@
             .header-container { flex-direction: column; align-items: flex-start; gap: 15px; } 
         }
         @media (max-width: 600px) {
-            body { padding: 15px; } /* Aprovecha toda la pantalla en móvil */
+            body { padding: 15px; }
             .header-text h1 { font-size: 22px; }
-            .kpi-container { grid-template-columns: 1fr; gap: 15px; } /* KPIs en una fila vertical */
-            .panel { padding: 15px; } /* Reduce bordes internos de las tarjetas */
-            .btn-export { width: 100%; } /* Botón gigante para pulgares */
-            .d3-chart, .d3-chart.tall, #chart-map { height: 350px !important; } /* Ajusta alturas de gráficos */
+            .kpi-container { grid-template-columns: 1fr; gap: 15px; }
+            .panel { padding: 15px; }
+            .btn-export { width: 100%; }
+            .d3-chart, .d3-chart.tall, #chart-map { height: 350px !important; }
             .panel-description { font-size: 12px; padding: 10px; }
         }
     </style>
@@ -88,35 +91,48 @@
     </div>
     
     <div class="dashboard">
+        <!-- Mapa -->
         <div class="panel full">
-            <h2>Distribución Salarial Global Promedio (USD)</h2>
+            <h2>Distribución Salarial Global Promedio</h2>
+            <div class="panel-subtitle">Comparativa internacional de compensación anual en USD por país</div>
             <div id="chart-map"></div>
         </div>
         
+        <!-- Matriz Correlación -->
         <div class="panel full">
             <h2>Matriz de Competitividad: Demanda vs. Impacto Salarial</h2>
+            <div class="panel-subtitle">Identificación de tecnologías Core de alta adopción frente a Nichos de alta especialización</div>
             <div class="panel-description">
                 <strong>Análisis:</strong> El <strong>cuadrante superior derecho</strong> representa el "Talento Core". El <strong>cuadrante superior izquierdo</strong> revela nichos de alta especialización y salarios top (Ej. Rust, PyTorch).
             </div>
             <div id="chart-skills-correlation" class="d3-chart tall"></div>
         </div>
 
+        <!-- Demanda de Roles -->
         <div class="panel full">
-            <h2>Volumen de Puestos Requeridos (Ofertas)</h2>
+            <h2>Volumen de Puestos Requeridos (Demanda por Rol)</h2>
+            <div class="panel-subtitle">Desarrollo Full-Stack y Back-End lideran masivamente la captación de vacantes globales</div>
             <div id="chart-roles-demand" class="d3-chart" style="height: 300px;"></div>
         </div>
 
+        <!-- Salarios por País y Rol -->
         <div class="panel full">
-            <h2>Salarios por Macro-Categoría y País Top <span>(Interactúa)</span></h2>
+            <h2>Salarios por Macro-Categoría y País Top</h2>
+            <div class="panel-subtitle">Infraestructura & Ops destaca con salarios pico en mercados maduros como USA y Alemania</div>
             <div id="chart-country-roles" class="d3-chart" style="height: 350px;"></div>
         </div>
         
+        <!-- Evolución Salarial -->
         <div class="panel">
-            <h2>Evolución Salarial Histórica <span>(Interactúa)</span></h2>
+            <h2>Evolución Salarial Histórica (2020-2026)</h2>
+            <div class="panel-subtitle">Estabilidad en la compensación promedio por categoría tras el impacto post-pandemia</div>
             <div id="chart-salary" class="d3-chart"></div>
         </div>
+        
+        <!-- Modalidad de Trabajo -->
         <div class="panel">
             <h2>Modalidad de Trabajo por Periodo</h2>
+            <div class="panel-subtitle">Transición sostenida hacia modelos híbridos y remotos consolidados hacia 2026</div>
             <div id="chart-workmode" class="d3-chart"></div>
         </div>
     </div>
@@ -191,11 +207,9 @@
             window.addEventListener('resize', () => chart.draw(data, options));
         }
 
-        // --- FUNCIONES D3 CON LÓGICA RESPONSIVE MÓVIL ---
-
         function drawSkillsCorrelationChart() {
             const container = document.getElementById('chart-skills-correlation');
-            const isMobile = window.innerWidth <= 600; // Detección móvil
+            const isMobile = window.innerWidth <= 600;
             const margin = {top: 20, right: isMobile ? 15 : 30, bottom: isMobile ? 60 : 50, left: isMobile ? 45 : 60};
             const width = container.clientWidth - margin.left - margin.right;
             const height = container.clientHeight - margin.top - margin.bottom;
@@ -204,7 +218,6 @@
             const x = d3.scaleLinear().domain([0, 13000]).range([0, width]);
             const y = d3.scaleLinear().domain([70000, 150000]).range([height, 0]);
 
-            // Menos "ticks" (números en ejes) si es móvil para evitar que se encimen
             svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(isMobile ? 4 : 8).tickFormat(d => d/1000 + "k"));
             svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(isMobile ? 5 : 6).tickFormat(d => "$" + d/1000 + "k"));
             svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
@@ -216,7 +229,6 @@
             svg.append("line").attr("class", "quadrant-bg").attr("x1", x(6500)).attr("y1", 0).attr("x2", x(6500)).attr("y2", height);
             svg.append("line").attr("class", "quadrant-bg").attr("x1", 0).attr("y1", y(110000)).attr("x2", width).attr("y2", y(110000));
             
-            // Ocultar textos de cuadrantes en móvil porque abarrotan la pantalla
             if (!isMobile) {
                 svg.append("text").attr("class", "quadrant-label").attr("x", x(12500)).attr("y", y(145000)).attr("text-anchor", "end").text("Core Cotizado");
                 svg.append("text").attr("class", "quadrant-label").attr("x", x(500)).attr("y", y(145000)).attr("text-anchor", "start").text("Nichos Premium");
@@ -238,7 +250,7 @@
         function drawRolesDemandChart() {
             const container = document.getElementById('chart-roles-demand');
             const isMobile = window.innerWidth <= 600;
-            const margin = {top: 10, right: 30, bottom: 20, left: isMobile ? 110 : 160}; // Margen izq menor en móvil
+            const margin = {top: 10, right: 30, bottom: 20, left: isMobile ? 110 : 160};
             const width = container.clientWidth - margin.left - margin.right;
             const height = container.clientHeight - margin.top - margin.bottom;
             const svg = d3.select("#chart-roles-demand").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
@@ -247,7 +259,7 @@
             const y = d3.scaleBand().domain(rolesDemandData.map(d => d.role)).range([height, 0]).padding(0.25);
             
             svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(isMobile ? 3 : 8));
-            svg.append("g").attr("class", "axis").call(d3.axisLeft(y)).selectAll("text").style("font-size", isMobile ? "9px" : "11px"); // Letra más chica en móvil
+            svg.append("g").attr("class", "axis").call(d3.axisLeft(y)).selectAll("text").style("font-size", isMobile ? "9px" : "11px");
             
             svg.selectAll("rect").data(rolesDemandData).join("rect").attr("x", 0).attr("y", d => y(d.role)).attr("height", y.bandwidth()).attr("fill", "#34d399").attr("rx", 3).attr("width", 0)
                 .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("fill", "#6ee7b7"); tooltip.style("opacity", 1).html(`<strong>${d.role}</strong>${d.count.toLocaleString()} vacantes`); }})
@@ -262,7 +274,6 @@
         function drawCountryRolesChart() {
             const container = document.getElementById('chart-country-roles');
             const isMobile = window.innerWidth <= 600;
-            // En móvil, subimos la gráfica y dibujamos la leyenda horizontalmente arriba
             const margin = {top: isMobile ? 40 : 20, right: isMobile ? 10 : 120, bottom: 40, left: isMobile ? 40 : 60};
             const width = container.clientWidth - margin.left - margin.right;
             const height = container.clientHeight - margin.top - margin.bottom;
@@ -287,7 +298,6 @@
                 .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("opacity", 1); tooltip.style("opacity", 0); }});
             bars.transition().duration(1000).delay((d, i) => i * 150).attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
             
-            // Leyenda Adaptativa (Arriba en móvil, derecha en desktop)
             const legend = svg.append("g").attr("transform", isMobile ? `translate(0, -30)` : `translate(${width + 10}, 0)`);
             subgroups.forEach((key, i) => {
                 const groupClass = `.bar-group-${key.replace(/ /g, '').replace(/&/g, '')}`;
@@ -319,7 +329,6 @@
             svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(isMobile ? 4 : 5).tickFormat(d => "$" + d/1000 + "k"));
             svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
             
-            // Leyenda superior en móvil
             if (isMobile) {
                 const legend = svg.append("g").attr("transform", `translate(0, -25)`);
                 ["Data & AI", "Software Dev", "Infra & Ops"].forEach((cat, i) => {
@@ -388,8 +397,6 @@
 
         function renderAllD3() { drawSkillsCorrelationChart(); drawRolesDemandChart(); drawCountryRolesChart(); drawSalaryChart(); drawWorkModeChart(); }
         renderAllD3();
-        
-        // El evento de resize vuelve a dibujar y ajusta márgenes en tiempo real si pasas de horizontal a vertical en tabletas
         window.addEventListener("resize", () => { d3.selectAll(".d3-chart svg").remove(); renderAllD3(); });
     </script>
 </body>
