@@ -2,12 +2,12 @@
 
 Este proyecto consiste en un panel interactivo (Dashboard) diseñado para analizar métricas cuantitativas y descriptivas del mercado digital global. Presenta las tendencias de compensación salarial, modalidades de trabajo y demanda de competencias técnicas en el sector tecnológico.
 
-## 🚀 Tecnologías Utilizadas
+## Tecnologías Utilizadas
 * **HTML5 & CSS3**: Arquitectura responsiva y diseño en modo oscuro (UI/UX) optimizado para legibilidad analítica.
 * **D3.js (v7)**: Manipulación de DOM impulsada por datos para la renderización de gráficos vectoriales (SVG) de alta fidelidad.
 * **Google Charts**: Renderizado de mapas geoespaciales interactivos.
 
-## 📊 Origen y Procesamiento de Datos (ETL)
+## Origen y Procesamiento de Datos (ETL)
 Los datos han sido pre-procesados mediante Python (Pandas) y consolidados a partir de las siguientes fuentes sintéticas y reales:
 1. `kaggle_cleaned.csv`: Evolución salarial histórica (2020-2026).
 2. `encuesta_sysarmy_20261_CSV.csv`: Ajustes regionales y modalidades.
@@ -21,3 +21,4 @@ Los perfiles tecnológicos han sido clusterizados en tres grandes *Macro-Categor
 
 ## ⚙️ Despliegue en Vercel
 Este repositorio está estructurado como una Single Page Application (SPA) estática. Para desplegarlo en Vercel, no se requieren configuraciones de Build o procesos de compilación Node.js.
+<img width="442" height="647" alt="image" src="https://github.com/user-attachments/assets/6ca9d59b-5c79-49e6-890b-a4568e401836" />
