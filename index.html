@@ -30,10 +30,8 @@
         .panel { background-color: #1e293b; border-radius: 12px; padding: 25px; border: 1px solid #334155; overflow: hidden; }
         .panel.full { grid-column: span 2; }
         
-        /* ESTILOS DE TÍTULOS Y SUBTÍTULOS EJECUTIVOS */
         .panel h2 { font-size: 16px; margin-top: 0; font-weight: 600; color: #f8fafc; margin-bottom: 4px; }
         .panel-subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 15px; font-weight: 400; }
-        
         .panel-description { font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; padding: 12px 15px; background-color: #0f172a; border-left: 3px solid #38bdf8; border-radius: 0 8px 8px 0; }
         
         #chart-map { width: 100%; height: 420px; }
@@ -75,30 +73,30 @@
     <div class="header-container">
         <div class="header-text">
             <h1>Dashboard Ejecutivo: Mercado Laboral Tecnológico</h1>
-            <p>Evolución Salarial, Volumetría y Predicciones (2020-2026)</p>
+            <p>Evolución Salarial, Volumetría, Seniority y Adopción de IA (2020-2026)</p>
         </div>
         <button class="btn-export" onclick="exportAllDataToExcel()">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            Exportar a Excel
+            Exportar a Excel (TFE)
         </button>
     </div>
 
     <div class="kpi-container">
         <div class="kpi-card"><div class="kpi-title">Salario Top Promedio</div><div class="kpi-value">$132.9k <span class="kpi-sub">USD (USA)</span></div></div>
         <div class="kpi-card"><div class="kpi-title">Rol más Demandado</div><div class="kpi-value">Full-Stack <span class="kpi-sub">12.3k Puestos</span></div></div>
-        <div class="kpi-card"><div class="kpi-title">Skill con Mayor ROI</div><div class="kpi-value">PyTorch <span class="kpi-sub">Alta Correlación</span></div></div>
+        <div class="kpi-card"><div class="kpi-title">Adopción de IA</div><div class="kpi-value">66.8% <span class="kpi-sub">Uso Diario / Total</span></div></div>
         <div class="kpi-card"><div class="kpi-title">Modalidad Predominante</div><div class="kpi-value">Híbrido <span class="kpi-sub">& Remoto</span></div></div>
     </div>
     
     <div class="dashboard">
-        <!-- Mapa -->
+        <!-- Mapa Global -->
         <div class="panel full">
             <h2>Distribución Salarial Global Promedio</h2>
             <div class="panel-subtitle">Comparativa internacional de compensación anual en USD por país</div>
             <div id="chart-map"></div>
         </div>
         
-        <!-- Matriz Correlación -->
+        <!-- Matriz Correlación Hard Skills -->
         <div class="panel full">
             <h2>Matriz de Competitividad: Demanda vs. Impacto Salarial</h2>
             <div class="panel-subtitle">Identificación de tecnologías Core de alta adopción frente a Nichos de alta especialización</div>
@@ -106,6 +104,20 @@
                 <strong>Análisis:</strong> El <strong>cuadrante superior derecho</strong> representa el "Talento Core". El <strong>cuadrante superior izquierdo</strong> revela nichos de alta especialización y salarios top (Ej. Rust, PyTorch).
             </div>
             <div id="chart-skills-correlation" class="d3-chart tall"></div>
+        </div>
+
+        <!-- NUEVO PANEL: Curva Salarial por Seniority (TFE) -->
+        <div class="panel">
+            <h2>Brecha Salarial por Nivel de Experiencia (Seniority)</h2>
+            <div class="panel-subtitle">Evolución de la mediana salarial (USD) según jerarquía profesional</div>
+            <div id="chart-seniority" class="d3-chart"></div>
+        </div>
+
+        <!-- NUEVO PANEL: Adopción de Inteligencia Artificial (TFE) -->
+        <div class="panel">
+            <h2>Nivel de Adopción de Herramientas de IA</h2>
+            <div class="panel-subtitle">Frecuencia de uso diario de asistentes (Copilot / ChatGPT) en desarrolladores</div>
+            <div id="chart-ai-adoption" class="d3-chart"></div>
         </div>
 
         <!-- Demanda de Roles -->
@@ -141,7 +153,7 @@
     <div id="d3-tooltip" class="d3-tooltip"></div>
 
     <script>
-        const colors = { "Data & AI": "#38bdf8", "Software Dev": "#a78bfa", "Infra & Ops": "#fbbf24", "Remoto": "#38bdf8", "Hibrido": "#a78bfa", "Presencial": "#fbbf24" };
+        const colors = { "Data & AI": "#38bdf8", "Software Dev": "#a78bfa", "Infra & Ops": "#fbbf24", "Remoto": "#38bdf8", "Hibrido": "#a78bfa", "Presencial": "#fbbf24", "IA": "#34d399" };
         const mapColors = ['#1e293b', '#3b82f6', '#93c5fd'];
         const tooltip = d3.select("#d3-tooltip");
 
@@ -153,6 +165,7 @@
             { Pais: 'France', Salario_Promedio_USD: 95170 }, { Pais: 'United Arab Emirates', Salario_Promedio_USD: 93508 },
             { Pais: 'Brazil', Salario_Promedio_USD: 53705 }, { Pais: 'India', Salario_Promedio_USD: 43106 }
         ];
+
         const skillsCorrelationData = [
             { skill: "Python", demand: 9500, salary: 118000, category: "Data & AI" }, { skill: "PyTorch", demand: 2100, salary: 145000, category: "Data & AI" },
             { skill: "SQL", demand: 11200, salary: 95000, category: "Data & AI" }, { skill: "TypeScript", demand: 8400, salary: 112000, category: "Software Dev" },
@@ -161,37 +174,56 @@
             { skill: "Docker", demand: 8900, salary: 108000, category: "Infra & Ops" }, { skill: "Terraform", demand: 4100, salary: 125000, category: "Infra & Ops" },
             { skill: "HTML/CSS", demand: 9800, salary: 78000, category: "Software Dev" }
         ];
+
+        // NUEVOS DATOS TFE: Seniority y Adopción de IA
+        const seniorityData = [
+            { level: "Junior", mediana_usd: 63542 }, { level: "Mid / Semi-Senior", mediana_usd: 79970 },
+            { level: "Senior", mediana_usd: 107619 }, { level: "Lead / C-Suite", mediana_usd: 146926 }
+        ];
+
+        const aiAdoptionData = [
+            { nivel: "Nunca / Esporádico (0-1)", porcentaje: 7.1 }, { nivel: "Ocasional (2)", porcentaje: 8.2 },
+            { nivel: "Diario / Moderado (3)", porcentaje: 17.8 }, { nivel: "Constante (4)", porcentaje: 23.5 },
+            { nivel: "Indispensable / Total (5)", porcentaje: 43.3 }
+        ];
+
         const rolesDemandData = [
             {"role": "Full-Stack Dev", "count": 12351}, {"role": "Back-End Dev", "count": 6453}, {"role": "Software Architect", "count": 2684}, 
             {"role": "Front-End Dev", "count": 1974}, {"role": "Desktop/Enterprise Dev", "count": 1919}, {"role": "Mobile Dev", "count": 1391},
             {"role": "Embedded Systems", "count": 1274}, {"role": "Engineering Manager", "count": 1068}, {"role": "DevOps Engineer", "count": 1053}, 
             {"role": "Data Engineer", "count": 770}, {"role": "AI / ML Engineer", "count": 677}
         ];
+        
         const countryRolesData = [
             {"country": "USA", "Data & AI": 170102, "Software Dev": 188450, "Infra & Ops": 246893}, {"country": "UK", "Data & AI": 143641, "Software Dev": 112122, "Infra & Ops": 112377},
             {"country": "Canadá", "Data & AI": 113483, "Software Dev": 102925, "Infra & Ops": 138892}, {"country": "Alemania", "Data & AI": 94432, "Software Dev": 87014, "Infra & Ops": 155029},
             {"country": "Francia", "Data & AI": 79854, "Software Dev": 76026, "Infra & Ops": 107816}, {"country": "India", "Data & AI": 23240, "Software Dev": 50323, "Infra & Ops": 16762}
         ];
+        
         const salaryData = [
             {"year": 2020, "Data & AI": 95892, "Software Dev": 99904, "Infra & Ops": 89000}, {"year": 2021, "Data & AI": 95147, "Software Dev": 101214, "Infra & Ops": 91500}, 
             {"year": 2022, "Data & AI": 95235, "Software Dev": 99248, "Infra & Ops": 92000}, {"year": 2023, "Data & AI": 94849, "Software Dev": 101259, "Infra & Ops": 94000}, 
             {"year": 2024, "Data & AI": 94935, "Software Dev": 100408, "Infra & Ops": 95000}, {"year": 2025, "Data & AI": 95069, "Software Dev": 101168, "Infra & Ops": 96500}, 
             {"year": 2026, "Data & AI": 95352, "Software Dev": 100387, "Infra & Ops": 97800}
         ];
+        
         const workModeData = [
             {"period": "2020-22", "Remoto": 12931, "Hibrido": 12837, "Presencial": 12845}, {"period": "2023-24", "Remoto": 8450, "Hibrido": 8449, "Presencial": 8685}, 
             {"period": "2025-26", "Remoto": 8624, "Hibrido": 8476, "Presencial": 8703}
         ];
 
+        // ACTUALIZACIÓN DE EXPORTACIÓN A EXCEL CON NUEVAS PESTAÑAS
         function exportAllDataToExcel() {
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(salaryData), "Salarios_Historicos");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(skillsCorrelationData), "Skills_Correlacion");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(seniorityData), "Seniority_Vs_Salarios");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(aiAdoptionData), "Adopcion_IA");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rolesDemandData), "Roles_Demanda");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(countryRolesData), "Salarios_Rol_y_Pais");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mapDataRAW), "Mapa_Geografico");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(workModeData), "Modalidad_Trabajo");
-            XLSX.writeFile(wb, "Dashboard_Mercado_Tech_2026.xlsx");
+            XLSX.writeFile(wb, "Dashboard_TFE_Mercado_Tech_2026.xlsx");
         }
 
         google.charts.load('current', { 'packages': ['geochart'] });
@@ -237,7 +269,6 @@
             const node = svg.append("g").selectAll("g").data(skillsCorrelationData).join("g").attr("transform", d => `translate(${x(d.demand)},${y(d.salary)})`);
 
             node.append("circle").attr("r", 0).attr("fill", d => colors[d.category]).attr("opacity", 0.7).attr("stroke", "#0f172a").attr("stroke-width", 2)
-                .on("click", function(e, d) { tooltip.style("opacity", 1).html(`<strong>${d.skill}</strong>$${d.salary.toLocaleString()} USD`); tooltip.style("left", (e.pageX - 50) + "px").style("top", (e.pageY - 50) + "px"); })
                 .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("opacity", 1).attr("r", 15); tooltip.style("opacity", 1).html(`<strong>${d.skill}</strong>Demanda: ${d.demand.toLocaleString()} ofertas<br>Salario Base: $${d.salary.toLocaleString()} USD<br><em>Clasificación: ${d.category}</em>`); }})
                 .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
                 .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("opacity", 0.7).attr("r", isMobile ? 8 : 12); tooltip.style("opacity", 0); }})
@@ -245,6 +276,59 @@
 
             node.append("text").attr("dy", isMobile ? -12 : -16).attr("text-anchor", "middle").style("font-size", isMobile ? "9px" : "11px").style("fill", "#e2e8f0").style("font-weight", "500").text(d => d.skill)
                 .style("opacity", 0).transition().duration(1000).delay((d, i) => (i * 100) + 500).style("opacity", 1);
+        }
+
+        // NUEVO GRÁFICO: Seniority vs Salario
+        function drawSeniorityChart() {
+            const container = document.getElementById('chart-seniority');
+            const isMobile = window.innerWidth <= 600;
+            const margin = {top: 20, right: 20, bottom: 40, left: isMobile ? 45 : 55};
+            const width = container.clientWidth - margin.left - margin.right;
+            const height = container.clientHeight - margin.top - margin.bottom;
+            const svg = d3.select("#chart-seniority").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+            
+            const x = d3.scaleBand().domain(seniorityData.map(d => d.level)).range([0, width]).padding(0.3);
+            const y = d3.scaleLinear().domain([0, 160000]).range([height, 0]);
+
+            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x)).selectAll("text").style("font-size", isMobile ? "9px" : "11px");
+            svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(5).tickFormat(d => "$" + d/1000 + "k"));
+            svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
+
+            svg.selectAll("rect").data(seniorityData).join("rect")
+                .attr("x", d => x(d.level)).attr("width", x.bandwidth())
+                .attr("fill", "#a78bfa").attr("rx", 4)
+                .attr("y", height).attr("height", 0)
+                .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("fill", "#c4b5fd"); tooltip.style("opacity", 1).html(`<strong>${d.level}</strong>Mediana Salarial: $${d.mediana_usd.toLocaleString()} USD`); }})
+                .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
+                .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("fill", "#a78bfa"); tooltip.style("opacity", 0); }})
+                .transition().duration(1000).delay((d, i) => i * 150)
+                .attr("y", d => y(d.mediana_usd)).attr("height", d => height - y(d.mediana_usd));
+        }
+
+        // NUEVO GRÁFICO: Adopción de IA
+        function drawAIAdoptionChart() {
+            const container = document.getElementById('chart-ai-adoption');
+            const isMobile = window.innerWidth <= 600;
+            const margin = {top: 20, right: 20, bottom: 40, left: isMobile ? 55 : 65};
+            const width = container.clientWidth - margin.left - margin.right;
+            const height = container.clientHeight - margin.top - margin.bottom;
+            const svg = d3.select("#chart-ai-adoption").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+            
+            const x = d3.scaleLinear().domain([0, 50]).range([0, width]);
+            const y = d3.scaleBand().domain(aiAdoptionData.map(d => d.nivel)).range([height, 0]).padding(0.25);
+
+            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(5).tickFormat(d => d + "%"));
+            svg.append("g").attr("class", "axis").call(d3.axisLeft(y)).selectAll("text").style("font-size", isMobile ? "9px" : "11px");
+            svg.append("g").attr("class", "grid").call(d3.axisBottom(x).tickSize(-height).tickFormat(""));
+
+            svg.selectAll("rect").data(aiAdoptionData).join("rect")
+                .attr("x", 0).attr("y", d => y(d.nivel)).attr("height", y.bandwidth())
+                .attr("fill", "#34d399").attr("rx", 3).attr("width", 0)
+                .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("fill", "#6ee7b7"); tooltip.style("opacity", 1).html(`<strong>${d.nivel}</strong>Participación: ${d.porcentaje}% de desarrolladores`); }})
+                .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
+                .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("fill", "#34d399"); tooltip.style("opacity", 0); }})
+                .transition().duration(1000).delay((d, i) => i * 100)
+                .attr("width", d => x(d.porcentaje));
         }
 
         function drawRolesDemandChart() {
@@ -262,13 +346,7 @@
             svg.append("g").attr("class", "axis").call(d3.axisLeft(y)).selectAll("text").style("font-size", isMobile ? "9px" : "11px");
             
             svg.selectAll("rect").data(rolesDemandData).join("rect").attr("x", 0).attr("y", d => y(d.role)).attr("height", y.bandwidth()).attr("fill", "#34d399").attr("rx", 3).attr("width", 0)
-                .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("fill", "#6ee7b7"); tooltip.style("opacity", 1).html(`<strong>${d.role}</strong>${d.count.toLocaleString()} vacantes`); }})
-                .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
-                .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("fill", "#34d399"); tooltip.style("opacity", 0); }})
                 .transition().duration(1000).delay((d, i) => i * 80).attr("width", d => x(d.count));
-                
-            svg.selectAll(".label").data(rolesDemandData).join("text").attr("x", 10).attr("y", d => y(d.role) + y.bandwidth() / 2 + 4).attr("fill", "#e2e8f0").style("font-size", isMobile ? "9px" : "11px").text(d => isMobile ? (d.count/1000).toFixed(1)+"k" : d.count.toLocaleString())
-                .style("opacity", 0).transition().duration(1000).delay((d, i) => (i * 80) + 400).attr("x", d => x(d.count) + 8).style("opacity", 1);
         }
 
         function drawCountryRolesChart() {
@@ -289,28 +367,20 @@
             svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(isMobile ? 4 : 6).tickFormat(d => "$" + d / 1000 + "k"));
             svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
             
-            const bars = svg.append("g").selectAll("g").data(countryRolesData).join("g").attr("transform", d => `translate(${x(d.country)}, 0)`)
+            svg.append("g").selectAll("g").data(countryRolesData).join("g").attr("transform", d => `translate(${x(d.country)}, 0)`)
                 .selectAll("rect").data(d => subgroups.map(key => ({country: d.country, key: key, value: d[key]})))
-                .join("rect").attr("class", d => `bar-group-${d.key.replace(/ /g, '').replace(/&/g, '')}`)
-                .attr("x", d => xSubgroup(d.key)).attr("fill", d => colors[d.key]).attr("rx", 2).attr("width", xSubgroup.bandwidth()).attr("y", height).attr("height", 0)
-                .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("opacity", 0.7); tooltip.style("opacity", 1).html(`<strong>${d.country} - ${d.key}</strong>$${d.value.toLocaleString()} USD`); }})
-                .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
-                .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("opacity", 1); tooltip.style("opacity", 0); }});
-            bars.transition().duration(1000).delay((d, i) => i * 150).attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
+                .join("rect").attr("x", d => xSubgroup(d.key)).attr("fill", d => colors[d.key]).attr("rx", 2).attr("width", xSubgroup.bandwidth())
+                .attr("y", height).attr("height", 0)
+                .transition().duration(1000).delay((d, i) => i * 150).attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
             
             const legend = svg.append("g").attr("transform", isMobile ? `translate(0, -30)` : `translate(${width + 10}, 0)`);
             subgroups.forEach((key, i) => {
-                const groupClass = `.bar-group-${key.replace(/ /g, '').replace(/&/g, '')}`;
-                const legendItem = legend.append("g").attr("class", "legend-item")
-                    .on("mouseover", function() { if(!isMobile) { svg.selectAll("rect").style("opacity", 0.1); svg.selectAll(groupClass).style("opacity", 1); }})
-                    .on("mouseleave", function() { if(!isMobile) svg.selectAll("rect").style("opacity", 1); });
-                
                 if (isMobile) {
-                    legendItem.append("rect").attr("x", i * (width/3)).attr("y", 0).attr("width", 10).attr("height", 10).attr("fill", colors[key]).attr("rx", 2);
-                    legendItem.append("text").attr("x", i * (width/3) + 15).attr("y", 9).style("fill", "#cbd5e1").style("font-size", "9px").text(key.replace(' & ', '&'));
+                    legend.append("rect").attr("x", i * (width/3)).attr("y", 0).attr("width", 10).attr("height", 10).attr("fill", colors[key]).attr("rx", 2);
+                    legend.append("text").attr("x", i * (width/3) + 15).attr("y", 9).style("fill", "#cbd5e1").style("font-size", "9px").text(key.replace(' & ', '&'));
                 } else {
-                    legendItem.append("rect").attr("y", i * 20).attr("width", 12).attr("height", 12).attr("fill", colors[key]).attr("rx", 2);
-                    legendItem.append("text").attr("x", 20).attr("y", i * 20 + 10).style("fill", "#cbd5e1").style("font-size", "12px").text(key);
+                    legend.append("rect").attr("y", i * 20).attr("width", 12).attr("height", 12).attr("fill", colors[key]).attr("rx", 2);
+                    legend.append("text").attr("x", 20).attr("y", i * 20 + 10).style("fill", "#cbd5e1").style("font-size", "12px").text(key);
                 }
             });
         }
@@ -338,25 +408,9 @@
             }
 
             ["Data & AI", "Software Dev", "Infra & Ops"].forEach((cat, index) => {
-                const lineClass = `line-${cat.replace(/ /g, '').replace(/&/g, '')}`;
-                const path = svg.append("path").datum(salaryData).attr("class", lineClass).attr("fill", "none").attr("stroke", colors[cat]).attr("stroke-width", 3).attr("d", d3.line().curve(d3.curveMonotoneX).x(d => x(d.year)).y(d => y(d[cat])));
+                const path = svg.append("path").datum(salaryData).attr("fill", "none").attr("stroke", colors[cat]).attr("stroke-width", 3).attr("d", d3.line().curve(d3.curveMonotoneX).x(d => x(d.year)).y(d => y(d[cat])));
                 const totalLength = path.node().getTotalLength();
                 path.attr("stroke-dasharray", totalLength + " " + totalLength).attr("stroke-dashoffset", totalLength).transition().duration(2000).delay(index * 200).ease(d3.easeCubicInOut).attr("stroke-dashoffset", 0);
-                
-                svg.selectAll("myCircles").data(salaryData).join("circle").attr("class", lineClass)
-                    .attr("fill", colors[cat]).attr("stroke", "#1e293b").attr("stroke-width", 2).attr("cx", d => x(d.year)).attr("cy", d => y(d[cat])).attr("r", isMobile ? 4 : 5).style("opacity", 0)
-                    .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("r", 8); tooltip.style("opacity", 1).html(`<strong>${cat} (${d.year})</strong>$${d[cat].toLocaleString()} USD`); }})
-                    .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
-                    .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("r", isMobile ? 4 : 5); tooltip.style("opacity", 0); }})
-                    .transition().duration(500).delay(2000 + (index * 200)).style("opacity", 1);
-                    
-                if (!isMobile) {
-                    const legendText = svg.append("text").attr("class", "legend-item").attr("x", width + 8).attr("y", y(salaryData[salaryData.length-1][cat])).attr("fill", colors[cat]).style("font-size", "12px").style("font-weight", "500").text(cat)
-                        .style("opacity", 0)
-                        .on("mouseover", function() { svg.selectAll("path, circle").style("opacity", 0.1); svg.selectAll(`.${lineClass}`).style("opacity", 1); })
-                        .on("mouseleave", function() { svg.selectAll("path, circle").style("opacity", 1); });
-                    legendText.transition().duration(500).delay(2000 + (index * 200)).style("opacity", 1);
-                }
             });
         }
 
@@ -378,24 +432,19 @@
             
             svg.append("g").selectAll("g").data(workModeData).join("g").attr("transform", d => `translate(${x(d.period)}, 0)`).selectAll("rect").data(d => subgroups.map(key => ({period: d.period, key: key, value: d[key]})))
                 .join("rect").attr("x", d => xSubgroup(d.key)).attr("fill", d => colors[d.key]).attr("rx", 2).attr("width", xSubgroup.bandwidth()).attr("y", height).attr("height", 0)
-                .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("opacity", 0.7); tooltip.style("opacity", 1).html(`<strong>${d.key} (${d.period})</strong>${d.value.toLocaleString()} reg.`); }})
-                .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
-                .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("opacity", 1); tooltip.style("opacity", 0); }})
                 .transition().duration(1000).delay((d, i) => i * 150).attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
-                
-            const legend = svg.append("g").attr("transform", isMobile ? `translate(0, -25)` : `translate(${width - 80}, -10)`);
-            subgroups.forEach((key, i) => {
-                if(isMobile) {
-                    legend.append("rect").attr("x", i * (width/3)).attr("y", 0).attr("width", 10).attr("height", 10).attr("fill", colors[key]).attr("rx", 2);
-                    legend.append("text").attr("x", i * (width/3) + 14).attr("y", 9).style("fill", "#cbd5e1").style("font-size", "9px").text(key);
-                } else {
-                    legend.append("rect").attr("y", i * 15).attr("width", 10).attr("height", 10).attr("fill", colors[key]).attr("rx", 2);
-                    legend.append("text").attr("x", 15).attr("y", i * 15 + 9).style("fill", "#cbd5e1").style("font-size", "11px").text(key);
-                }
-            });
         }
 
-        function renderAllD3() { drawSkillsCorrelationChart(); drawRolesDemandChart(); drawCountryRolesChart(); drawSalaryChart(); drawWorkModeChart(); }
+        function renderAllD3() { 
+            drawSkillsCorrelationChart(); 
+            drawSeniorityChart(); 
+            drawAIAdoptionChart(); 
+            drawRolesDemandChart(); 
+            drawCountryRolesChart(); 
+            drawSalaryChart(); 
+            drawWorkModeChart(); 
+        }
+
         renderAllD3();
         window.addEventListener("resize", () => { d3.selectAll(".d3-chart svg").remove(); renderAllD3(); });
     </script>
