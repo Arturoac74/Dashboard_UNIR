@@ -4,54 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Analítico: Mercado Digital (2020-2026)</title>
+    
+    <!-- Librerías de Visualización -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+    <!-- NUEVA LIBRERÍA: SheetJS para exportar a Excel múltiple -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <style>
-        body { 
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background-color: #0f172a; 
-            color: #f1f5f9; 
-            margin: 0; 
-            padding: 40px; 
-        }
-        .header-container { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-end; 
-            margin-bottom: 25px; 
-            border-bottom: 1px solid #334155; 
-            padding-bottom: 15px; 
-        }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #0f172a; color: #f1f5f9; margin: 0; padding: 40px; }
+        .header-container { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
         .header-text h1 { margin: 0; font-weight: 500; color: #f8fafc; letter-spacing: -0.5px; }
         .header-text p { color: #94a3b8; margin-top: 5px; font-size: 14px; margin-bottom: 0;}
         
-        /* BOTÓN DE DESCARGA RESTAURADO */
+        /* BOTÓN DE DESCARGA */
         .btn-export { 
-            background-color: #38bdf8; 
-            color: #0f172a; 
-            border: none; 
-            padding: 10px 20px; 
-            border-radius: 6px; 
-            font-weight: 600; 
-            font-size: 13px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
+            background-color: #38bdf8; color: #0f172a; border: none; padding: 10px 20px; 
+            border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; 
+            transition: all 0.2s; display: flex; align-items: center; gap: 8px; 
         }
-        .btn-export:hover { 
-            background-color: #7dd3fc; 
-            transform: translateY(-2px); 
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); 
-        }
+        .btn-export:hover { background-color: #7dd3fc; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); }
         
         .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px; }
         .kpi-card { background: linear-gradient(145deg, #1e293b, #0f172a); border-radius: 12px; padding: 20px; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-left: 4px solid #38bdf8; transition: transform 0.2s; }
         .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); }
-        .kpi-card:nth-child(2) { border-left-color: #34d399; } 
-        .kpi-card:nth-child(3) { border-left-color: #a78bfa; } 
-        .kpi-card:nth-child(4) { border-left-color: #fbbf24; }
+        .kpi-card:nth-child(2) { border-left-color: #34d399; } .kpi-card:nth-child(3) { border-left-color: #a78bfa; } .kpi-card:nth-child(4) { border-left-color: #fbbf24; }
         .kpi-title { font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600;}
         .kpi-value { font-size: 28px; font-weight: 700; color: #f8fafc; display: flex; align-items: baseline; gap: 6px; margin-top: 8px;}
         .kpi-sub { font-size: 13px; color: #64748b; font-weight: 400; }
@@ -69,7 +47,6 @@
         .axis text { fill: #94a3b8; font-size: 11px; }
         .axis path, .axis line { stroke: #475569; }
         .grid line { stroke: #334155; stroke-dasharray: 4,4; }
-        
         .legend-item { cursor: pointer; transition: opacity 0.2s; }
         .legend-item:hover { opacity: 0.7; }
         
@@ -81,12 +58,7 @@
         .quadrant-bg { fill: transparent; stroke: #334155; stroke-dasharray: 5,5; stroke-width: 1px; }
         .quadrant-label { fill: #475569; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
-        @media (max-width: 1024px) { 
-            .dashboard { grid-template-columns: 1fr; } 
-            .panel.full { grid-column: span 1; } 
-            .kpi-container { grid-template-columns: repeat(2, 1fr); } 
-            .header-container { flex-direction: column; align-items: flex-start; gap: 15px; } 
-        }
+        @media (max-width: 1024px) { .dashboard { grid-template-columns: 1fr; } .panel.full { grid-column: span 1; } .kpi-container { grid-template-columns: repeat(2, 1fr); } .header-container { flex-direction: column; align-items: flex-start; gap: 15px; } }
     </style>
 </head>
 <body>
@@ -95,30 +67,19 @@
             <h1>Dashboard Ejecutivo: Mercado Laboral Tecnológico</h1>
             <p>Evolución Salarial, Volumetría de Demanda y Análisis Predictivo de Hard Skills (2020-2026)</p>
         </div>
-        <!-- BOTÓN CON FUNCIÓN ONCLICK -->
-        <button class="btn-export" onclick="exportDataToCSV()">
+        <!-- BOTÓN ACTUALIZADO PARA EXPORTAR EXCEL COMPLETO -->
+        <button class="btn-export" onclick="exportAllDataToExcel()">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            Exportar Datos a CSV
+            Exportar Todos los Datos (Excel)
         </button>
     </div>
 
+    <!-- TARJETAS KPI -->
     <div class="kpi-container">
-        <div class="kpi-card">
-            <div class="kpi-title">Salario Top Promedio</div>
-            <div class="kpi-value">$132.9k <span class="kpi-sub">USD (USA)</span></div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-title">Rol más Demandado</div>
-            <div class="kpi-value">Full-Stack <span class="kpi-sub">12.3k Puestos</span></div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-title">Skill con Mayor ROI</div>
-            <div class="kpi-value">PyTorch <span class="kpi-sub">Correlación Salarial</span></div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-title">Modalidad Predominante</div>
-            <div class="kpi-value">Híbrido <span class="kpi-sub">& Remoto</span></div>
-        </div>
+        <div class="kpi-card"><div class="kpi-title">Salario Top Promedio</div><div class="kpi-value">$132.9k <span class="kpi-sub">USD (USA)</span></div></div>
+        <div class="kpi-card"><div class="kpi-title">Rol más Demandado</div><div class="kpi-value">Full-Stack <span class="kpi-sub">12.3k Puestos</span></div></div>
+        <div class="kpi-card"><div class="kpi-title">Skill con Mayor ROI</div><div class="kpi-value">PyTorch <span class="kpi-sub">Correlación Salarial</span></div></div>
+        <div class="kpi-card"><div class="kpi-title">Modalidad Predominante</div><div class="kpi-value">Híbrido <span class="kpi-sub">& Remoto</span></div></div>
     </div>
     
     <div class="dashboard">
@@ -130,8 +91,8 @@
         <div class="panel full">
             <h2>Matriz de Competitividad: Demanda vs. Impacto Salarial por Tecnología (Hard Skills)</h2>
             <div class="panel-description">
-                <strong>Análisis de Correlación Estratégica:</strong> Esta matriz cruza la empleabilidad (Eje X) con el retorno financiero (Eje Y) de cada tecnología. 
-                Las habilidades en el <strong>cuadrante superior derecho</strong> representan el "Talento Core" altamente cotizado. Las del <strong>cuadrante superior izquierdo</strong> (baja demanda, sueldo top) revelan nichos de alta especialización (Ej. Rust, PyTorch).
+                <strong>Análisis de Correlación Estratégica:</strong> Esta matriz cruza la empleabilidad (Eje X) con el retorno financiero (Eje Y). 
+                Las habilidades en el <strong>cuadrante superior derecho</strong> representan el "Talento Core". Las del <strong>cuadrante superior izquierdo</strong> revelan nichos de alta especialización (Ej. Rust, PyTorch).
             </div>
             <div id="chart-skills-correlation" class="d3-chart tall"></div>
         </div>
@@ -164,17 +125,23 @@
         const mapColors = ['#1e293b', '#3b82f6', '#93c5fd'];
         const tooltip = d3.select("#d3-tooltip");
 
+        // --- BASES DE DATOS DEL DASHBOARD ---
+        
+        const mapDataRAW = [
+            { Pais: 'United States', Salario_Promedio_USD: 132995 }, { Pais: 'Singapore', Salario_Promedio_USD: 116955 },
+            { Pais: 'Australia', Salario_Promedio_USD: 110550 }, { Pais: 'Canada', Salario_Promedio_USD: 108671 },
+            { Pais: 'United Kingdom', Salario_Promedio_USD: 102826 }, { Pais: 'Netherlands', Salario_Promedio_USD: 102379 },
+            { Pais: 'Germany', Salario_Promedio_USD: 100008 }, { Pais: 'Japan', Salario_Promedio_USD: 98508 },
+            { Pais: 'France', Salario_Promedio_USD: 95170 }, { Pais: 'United Arab Emirates', Salario_Promedio_USD: 93508 },
+            { Pais: 'Brazil', Salario_Promedio_USD: 53705 }, { Pais: 'India', Salario_Promedio_USD: 43106 }
+        ];
+
         const skillsCorrelationData = [
-            { skill: "Python", demand: 9500, salary: 118000, category: "Data & AI" },
-            { skill: "PyTorch", demand: 2100, salary: 145000, category: "Data & AI" },
-            { skill: "SQL", demand: 11200, salary: 95000, category: "Data & AI" },
-            { skill: "TypeScript", demand: 8400, salary: 112000, category: "Software Dev" },
-            { skill: "JavaScript", demand: 12000, salary: 92000, category: "Software Dev" },
-            { skill: "Rust", demand: 1800, salary: 138000, category: "Software Dev" },
-            { skill: "Go", demand: 3200, salary: 128000, category: "Software Dev" },
-            { skill: "Kubernetes", demand: 5400, salary: 132000, category: "Infra & Ops" },
-            { skill: "Docker", demand: 8900, salary: 108000, category: "Infra & Ops" },
-            { skill: "Terraform", demand: 4100, salary: 125000, category: "Infra & Ops" },
+            { skill: "Python", demand: 9500, salary: 118000, category: "Data & AI" }, { skill: "PyTorch", demand: 2100, salary: 145000, category: "Data & AI" },
+            { skill: "SQL", demand: 11200, salary: 95000, category: "Data & AI" }, { skill: "TypeScript", demand: 8400, salary: 112000, category: "Software Dev" },
+            { skill: "JavaScript", demand: 12000, salary: 92000, category: "Software Dev" }, { skill: "Rust", demand: 1800, salary: 138000, category: "Software Dev" },
+            { skill: "Go", demand: 3200, salary: 128000, category: "Software Dev" }, { skill: "Kubernetes", demand: 5400, salary: 132000, category: "Infra & Ops" },
+            { skill: "Docker", demand: 8900, salary: 108000, category: "Infra & Ops" }, { skill: "Terraform", demand: 4100, salary: 125000, category: "Infra & Ops" },
             { skill: "HTML/CSS", demand: 9800, salary: 78000, category: "Software Dev" }
         ];
 
@@ -203,29 +170,44 @@
             {"period": "2025-26", "Remoto": 8624, "Hibrido": 8476, "Presencial": 8703}
         ];
 
-        // --- CÓDIGO DEL BOTÓN RESTAURADO COMPLETAMENTE ---
-        function exportDataToCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Anio,Categoria_Data_AI_USD,Categoria_SoftwareDev_USD,Categoria_InfraOps_USD\n";
-            salaryData.forEach(row => {
-                csvContent += `${row.year},${row["Data & AI"]},${row["Software Dev"]},${row["Infra & Ops"]}\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "historico_salarios_tecnologicos.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        // --- NUEVA FUNCIÓN: EXPORTACIÓN MÚLTIPLE A EXCEL (.xlsx) ---
+        function exportAllDataToExcel() {
+            // Creamos un nuevo libro de Excel virtual
+            const wb = XLSX.utils.book_new();
+
+            // Transformamos cada base de datos json a una "Hoja" de Excel (Worksheet)
+            const ws_salarios = XLSX.utils.json_to_sheet(salaryData);
+            const ws_mapa = XLSX.utils.json_to_sheet(mapDataRAW);
+            const ws_correlacion = XLSX.utils.json_to_sheet(skillsCorrelationData);
+            const ws_demanda_roles = XLSX.utils.json_to_sheet(rolesDemandData);
+            const ws_roles_pais = XLSX.utils.json_to_sheet(countryRolesData);
+            const ws_modalidad = XLSX.utils.json_to_sheet(workModeData);
+
+            // Añadimos las hojas al libro, poniéndoles nombres claros a las pestañas
+            XLSX.utils.book_append_sheet(wb, ws_salarios, "Salarios_Historicos");
+            XLSX.utils.book_append_sheet(wb, ws_correlacion, "Skills_Correlacion");
+            XLSX.utils.book_append_sheet(wb, ws_demanda_roles, "Roles_Demanda");
+            XLSX.utils.book_append_sheet(wb, ws_roles_pais, "Salarios_Rol_y_Pais");
+            XLSX.utils.book_append_sheet(wb, ws_mapa, "Mapa_Geografico");
+            XLSX.utils.book_append_sheet(wb, ws_modalidad, "Modalidad_Trabajo");
+
+            // Forzamos la descarga del archivo al navegador del usuario
+            XLSX.writeFile(wb, "Dashboard_Mercado_Tech_2026.xlsx");
         }
+
 
         // --- MAPA GOOGLE CHARTS ---
         google.charts.load('current', { 'packages': ['geochart'] });
         google.charts.setOnLoadCallback(drawRegionsMap);
         function drawRegionsMap() {
-            var data = google.visualization.arrayToDataTable([
-                ['País', 'Salario Promedio (USD)'], ['United States', 132995], ['Singapore', 116955], ['Australia', 110550], ['Canada', 108671], ['United Kingdom', 102826], ['Netherlands', 102379], ['Germany', 100008], ['Japan', 98508], ['France', 95170], ['United Arab Emirates', 93508], ['Brazil', 53705], ['India', 43106]
-            ]);
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'País');
+            data.addColumn('number', 'Salario Promedio (USD)');
+            
+            mapDataRAW.forEach(row => {
+                data.addRow([row.Pais, row.Salario_Promedio_USD]);
+            });
+
             var options = { backgroundColor: 'transparent', datalessRegionColor: '#0f172a', defaultColor: '#334155', colorAxis: { colors: mapColors }, legend: { textStyle: { color: '#94a3b8' } } };
             var chart = new google.visualization.GeoChart(document.getElementById('chart-map'));
             chart.draw(data, options);
@@ -267,6 +249,7 @@
                 .style("opacity", 0).transition().duration(1000).delay((d, i) => (i * 100) + 500).style("opacity", 1);
         }
 
+        // --- DEMÁS GRÁFICOS (Mismo código) ---
         function drawRolesDemandChart() {
             const container = document.getElementById('chart-roles-demand');
             const margin = {top: 10, right: 40, bottom: 20, left: 160}, width = container.clientWidth - margin.left - margin.right, height = container.clientHeight - margin.top - margin.bottom;
