@@ -15,14 +15,37 @@
             margin: 0;
             padding: 40px;
         }
-        .header {
+        
+        /* HEADER FLEX PARA INCLUIR EL BOTÓN */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
             margin-bottom: 25px;
             border-bottom: 1px solid #334155;
             padding-bottom: 15px;
         }
-        .header h1 { margin: 0; font-weight: 500; color: #f8fafc; letter-spacing: -0.5px; }
-        .header p { color: #94a3b8; margin-top: 5px; font-size: 14px; }
+        .header-text h1 { margin: 0; font-weight: 500; color: #f8fafc; letter-spacing: -0.5px; }
+        .header-text p { color: #94a3b8; margin-top: 5px; font-size: 14px; margin-bottom: 0;}
         
+        /* BOTÓN DE DESCARGA */
+        .btn-export {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-export:hover { background-color: #7dd3fc; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); }
+        .btn-export svg { width: 16px; height: 16px; }
+
         /* --- ESTILOS PARA KPIs --- */
         .kpi-container {
             display: grid;
@@ -39,10 +62,7 @@
             border-left: 4px solid #38bdf8; 
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        .kpi-card:hover { 
-            transform: translateY(-4px); 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-        }
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); }
         .kpi-card:nth-child(2) { border-left-color: #34d399; } 
         .kpi-card:nth-child(3) { border-left-color: #a78bfa; } 
         .kpi-card:nth-child(4) { border-left-color: #fbbf24; } 
@@ -52,34 +72,13 @@
         .kpi-sub { font-size: 13px; color: #64748b; font-weight: 400; }
 
         /* --- DASHBOARD GRID --- */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-        .panel {
-            background-color: #1e293b; 
-            border-radius: 12px;
-            padding: 25px;
-            border: 1px solid #334155;
-        }
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .panel { background-color: #1e293b; border-radius: 12px; padding: 25px; border: 1px solid #334155; }
         .panel.full { grid-column: span 2; }
-        .panel h2 {
-            font-size: 15px;
-            margin-top: 0;
-            font-weight: 600;
-            color: #e2e8f0;
-            margin-bottom: 15px;
-        }
+        .panel h2 { font-size: 15px; margin-top: 0; font-weight: 600; color: #e2e8f0; margin-bottom: 15px; }
         .panel-description {
-            font-size: 13px;
-            color: #cbd5e1;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            padding: 12px 15px;
-            background-color: #0f172a;
-            border-left: 3px solid #38bdf8;
-            border-radius: 0 8px 8px 0;
+            font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px;
+            padding: 12px 15px; background-color: #0f172a; border-left: 3px solid #38bdf8; border-radius: 0 8px 8px 0;
         }
         
         #chart-map { width: 100%; height: 420px; }
@@ -89,42 +88,39 @@
         .axis path, .axis line { stroke: #475569; }
         .grid line { stroke: #334155; stroke-dasharray: 4,4; }
         
-        /* --- NUEVO: TOOLTIP DE D3.JS --- */
+        /* LEYENDA INTERACTIVA */
+        .legend-item { cursor: pointer; transition: opacity 0.2s; }
+        .legend-item:hover { opacity: 0.7; }
+
+        /* TOOLTIPS */
         .d3-tooltip {
-            position: absolute;
-            background-color: #0f172a;
-            border: 1px solid #38bdf8;
-            color: #f1f5f9;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            pointer-events: none;
-            opacity: 0;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
-            z-index: 1000;
-            transition: opacity 0.1s ease;
+            position: absolute; background-color: #0f172a; border: 1px solid #38bdf8; color: #f1f5f9;
+            padding: 10px 14px; border-radius: 8px; font-size: 13px; pointer-events: none; opacity: 0;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); z-index: 1000; transition: opacity 0.1s ease;
         }
         .d3-tooltip strong { color: #38bdf8; display: block; margin-bottom: 4px;}
-
-        /* Tooltip de Google Charts */
-        .google-visualization-tooltip {
-            background-color: #1e293b !important;
-            border: 1px solid #334155 !important;
-            border-radius: 6px !important;
-        }
+        .google-visualization-tooltip { background-color: #1e293b !important; border: 1px solid #334155 !important; border-radius: 6px !important; }
         .google-visualization-tooltip-item span { color: #f1f5f9 !important; }
         
         @media (max-width: 1024px) {
             .dashboard { grid-template-columns: 1fr; }
             .panel.full { grid-column: span 1; }
             .kpi-container { grid-template-columns: repeat(2, 1fr); }
+            .header-container { flex-direction: column; align-items: flex-start; gap: 15px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Dashboard Ejecutivo: Mercado Laboral Tecnológico</h1>
-        <p>Evolución Salarial, Volumetría de Demanda y Distribución Geográfica (2020-2026)</p>
+    <div class="header-container">
+        <div class="header-text">
+            <h1>Dashboard Ejecutivo: Mercado Laboral Tecnológico</h1>
+            <p>Evolución Salarial, Volumetría de Demanda y Distribución Geográfica (2020-2026)</p>
+        </div>
+        <!-- Botón de Exportación -->
+        <button class="btn-export" onclick="exportDataToCSV()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Exportar Datos a CSV
+        </button>
     </div>
 
     <!-- TARJETAS KPI -->
@@ -162,12 +158,12 @@
         </div>
 
         <div class="panel full">
-            <h2>Salarios por Macro-Categoría y País Top</h2>
+            <h2>Salarios por Macro-Categoría y País Top <span>(Interactúa con la leyenda)</span></h2>
             <div id="chart-country-roles" class="d3-chart" style="height: 350px;"></div>
         </div>
         
         <div class="panel">
-            <h2>Evolución Salarial Histórica (USD)</h2>
+            <h2>Evolución Salarial Histórica (USD) <span>(Interactúa con la leyenda)</span></h2>
             <div id="chart-salary" class="d3-chart"></div>
         </div>
         <div class="panel">
@@ -176,55 +172,20 @@
         </div>
     </div>
 
-    <!-- Contenedor del Tooltip de D3 -->
+    <!-- Tooltip -->
     <div id="d3-tooltip" class="d3-tooltip"></div>
 
     <script>
         // --- COLORES ---
-        const colors = {
-            "Data & AI": "#38bdf8",     
-            "Software Dev": "#a78bfa",  
-            "Infra & Ops": "#fbbf24",   
-            "Remoto": "#38bdf8",
-            "Hibrido": "#a78bfa",
-            "Presencial": "#fbbf24"
-        };
+        const colors = { "Data & AI": "#38bdf8", "Software Dev": "#a78bfa", "Infra & Ops": "#fbbf24", "Remoto": "#38bdf8", "Hibrido": "#a78bfa", "Presencial": "#fbbf24" };
         const mapColors = ['#1e293b', '#3b82f6', '#93c5fd'];
-
-        // --- GOOGLE CHARTS ---
-        google.charts.load('current', { 'packages': ['geochart'] });
-        google.charts.setOnLoadCallback(drawRegionsMap);
-
-        function drawRegionsMap() {
-            var data = google.visualization.arrayToDataTable([
-                ['País', 'Salario Promedio (USD)'],
-                ['United States', 132995], ['Singapore', 116955], ['Australia', 110550],
-                ['Canada', 108671], ['United Kingdom', 102826], ['Netherlands', 102379],
-                ['Germany', 100008], ['Japan', 98508], ['France', 95170],
-                ['United Arab Emirates', 93508], ['Brazil', 53705], ['India', 43106]
-            ]);
-
-            var options = {
-                backgroundColor: 'transparent',
-                datalessRegionColor: '#0f172a',
-                defaultColor: '#334155',
-                colorAxis: { colors: mapColors },
-                legend: { textStyle: { color: '#94a3b8' } }
-            };
-
-            var chart = new google.visualization.GeoChart(document.getElementById('chart-map'));
-            chart.draw(data, options);
-            window.addEventListener('resize', () => chart.draw(data, options));
-        }
 
         // --- DATOS ---
         const rolesDemandData = [
-            {"role": "Full-Stack Dev", "count": 12351}, {"role": "Back-End Dev", "count": 6453},
-            {"role": "Software Architect", "count": 2684}, {"role": "Front-End Dev", "count": 1974},
-            {"role": "Desktop/Enterprise Dev", "count": 1919}, {"role": "Mobile Dev", "count": 1391},
-            {"role": "Embedded Systems", "count": 1274}, {"role": "Engineering Manager", "count": 1068},
-            {"role": "DevOps Engineer", "count": 1053}, {"role": "Data Engineer", "count": 770},
-            {"role": "AI / ML Engineer", "count": 677}
+            {"role": "Full-Stack Dev", "count": 12351}, {"role": "Back-End Dev", "count": 6453}, {"role": "Software Architect", "count": 2684}, 
+            {"role": "Front-End Dev", "count": 1974}, {"role": "Desktop/Enterprise Dev", "count": 1919}, {"role": "Mobile Dev", "count": 1391},
+            {"role": "Embedded Systems", "count": 1274}, {"role": "Engineering Manager", "count": 1068}, {"role": "DevOps Engineer", "count": 1053}, 
+            {"role": "Data Engineer", "count": 770}, {"role": "AI / ML Engineer", "count": 677}
         ];
 
         const countryRolesData = [
@@ -252,22 +213,45 @@
             {"period": "2025-26", "Remoto": 8624, "Hibrido": 8476, "Presencial": 8703}
         ];
 
-        // Instancia del Tooltip global
+        // --- FUNCIÓN DE EXPORTACIÓN A EXCEL/CSV ---
+        function exportDataToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Anio,Categoria_Data_AI_USD,Categoria_SoftwareDev_USD,Categoria_InfraOps_USD\n";
+            salaryData.forEach(row => {
+                csvContent += `${row.year},${row["Data & AI"]},${row["Software Dev"]},${row["Infra & Ops"]}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "historico_salarios_tecnologicos.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         const tooltip = d3.select("#d3-tooltip");
 
-        // --- FUNCIONES DE D3 ---
+        google.charts.load('current', { 'packages': ['geochart'] });
+        google.charts.setOnLoadCallback(drawRegionsMap);
+
+        function drawRegionsMap() {
+            var data = google.visualization.arrayToDataTable([
+                ['País', 'Salario Promedio (USD)'],
+                ['United States', 132995], ['Singapore', 116955], ['Australia', 110550],
+                ['Canada', 108671], ['United Kingdom', 102826], ['Netherlands', 102379],
+                ['Germany', 100008], ['Japan', 98508], ['France', 95170],
+                ['United Arab Emirates', 93508], ['Brazil', 53705], ['India', 43106]
+            ]);
+            var options = { backgroundColor: 'transparent', datalessRegionColor: '#0f172a', defaultColor: '#334155', colorAxis: { colors: mapColors }, legend: { textStyle: { color: '#94a3b8' } } };
+            var chart = new google.visualization.GeoChart(document.getElementById('chart-map'));
+            chart.draw(data, options);
+            window.addEventListener('resize', () => chart.draw(data, options));
+        }
 
         function drawRolesDemandChart() {
             const container = document.getElementById('chart-roles-demand');
-            const margin = {top: 10, right: 40, bottom: 20, left: 160},
-                  width = container.clientWidth - margin.left - margin.right,
-                  height = container.clientHeight - margin.top - margin.bottom;
-
-            const svg = d3.select("#chart-roles-demand").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
+            const margin = {top: 10, right: 40, bottom: 20, left: 160}, width = container.clientWidth - margin.left - margin.right, height = container.clientHeight - margin.top - margin.bottom;
+            const svg = d3.select("#chart-roles-demand").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
             rolesDemandData.sort((a, b) => a.count - b.count); 
             const x = d3.scaleLinear().domain([0, d3.max(rolesDemandData, d => d.count) + 1500]).range([0, width]);
             const y = d3.scaleBand().domain(rolesDemandData.map(d => d.role)).range([height, 0]).padding(0.25);
@@ -276,35 +260,21 @@
             svg.append("g").attr("class", "axis").call(d3.axisLeft(y));
 
             svg.selectAll("rect").data(rolesDemandData).join("rect")
-                .attr("x", 0).attr("y", d => y(d.role)).attr("height", y.bandwidth())
-                .attr("fill", "#34d399").attr("rx", 4)
-                .attr("width", 0)
-                // INTERACTIVIDAD HOVER
-                .on("mouseover", function(event, d) {
-                    d3.select(this).attr("fill", "#6ee7b7");
-                    tooltip.style("opacity", 1).html(`<strong>${d.role}</strong>${d.count.toLocaleString()} vacantes registradas`);
-                })
-                .on("mousemove", (event) => tooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 28) + "px"))
-                .on("mouseleave", function(event, d) {
-                    d3.select(this).attr("fill", "#34d399");
-                    tooltip.style("opacity", 0);
-                })
-                // ANIMACIÓN
-                .transition().duration(1000).delay((d, i) => i * 80)
-                .attr("width", d => x(d.count));
+                .attr("x", 0).attr("y", d => y(d.role)).attr("height", y.bandwidth()).attr("fill", "#34d399").attr("rx", 4).attr("width", 0)
+                .on("mouseover", function(e, d) { d3.select(this).attr("fill", "#6ee7b7"); tooltip.style("opacity", 1).html(`<strong>${d.role}</strong>${d.count.toLocaleString()} vacantes`); })
+                .on("mousemove", e => tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"))
+                .on("mouseleave", function() { d3.select(this).attr("fill", "#34d399"); tooltip.style("opacity", 0); })
+                .transition().duration(1000).delay((d, i) => i * 80).attr("width", d => x(d.count));
+                
+            svg.selectAll(".label").data(rolesDemandData).join("text")
+                .attr("x", 10).attr("y", d => y(d.role) + y.bandwidth() / 2 + 4).attr("fill", "#e2e8f0").style("font-size", "11px").text(d => d.count.toLocaleString())
+                .style("opacity", 0).transition().duration(1000).delay((d, i) => (i * 80) + 400).attr("x", d => x(d.count) + 8).style("opacity", 1);
         }
 
         function drawCountryRolesChart() {
             const container = document.getElementById('chart-country-roles');
-            const margin = {top: 20, right: 120, bottom: 40, left: 60},
-                  width = container.clientWidth - margin.left - margin.right,
-                  height = container.clientHeight - margin.top - margin.bottom;
-
-            const svg = d3.select("#chart-country-roles").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
+            const margin = {top: 20, right: 120, bottom: 40, left: 60}, width = container.clientWidth - margin.left - margin.right, height = container.clientHeight - margin.top - margin.bottom;
+            const svg = d3.select("#chart-country-roles").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
             const subgroups = ["Data & AI", "Software Dev", "Infra & Ops"];
             const groups = countryRolesData.map(d => d.country);
 
@@ -316,43 +286,33 @@
             svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(6).tickFormat(d => "$" + d / 1000 + "k"));
             svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
 
-            svg.append("g").selectAll("g").data(countryRolesData).join("g")
-                .attr("transform", d => `translate(${x(d.country)}, 0)`)
+            const bars = svg.append("g").selectAll("g").data(countryRolesData).join("g").attr("transform", d => `translate(${x(d.country)}, 0)`)
                 .selectAll("rect").data(d => subgroups.map(key => ({country: d.country, key: key, value: d[key]})))
-                .join("rect").attr("x", d => xSubgroup(d.key)).attr("fill", d => colors[d.key]).attr("rx", 3)
-                .attr("width", xSubgroup.bandwidth())
+                .join("rect").attr("class", d => `bar-group-${d.key.replace(/ /g, '').replace(/&/g, '')}`)
+                .attr("x", d => xSubgroup(d.key)).attr("fill", d => colors[d.key]).attr("rx", 3).attr("width", xSubgroup.bandwidth())
                 .attr("y", height).attr("height", 0)
-                // INTERACTIVIDAD
-                .on("mouseover", function(event, d) {
-                    d3.select(this).attr("opacity", 0.7);
-                    tooltip.style("opacity", 1).html(`<strong>${d.country} - ${d.key}</strong>$${d.value.toLocaleString()} USD / año`);
-                })
-                .on("mousemove", (event) => tooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 28) + "px"))
-                .on("mouseleave", function() {
-                    d3.select(this).attr("opacity", 1);
-                    tooltip.style("opacity", 0);
-                })
-                .transition().duration(1000).delay((d, i) => i * 150)
-                .attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
+                .on("mouseover", function(e, d) { d3.select(this).attr("opacity", 0.7); tooltip.style("opacity", 1).html(`<strong>${d.country} - ${d.key}</strong>$${d.value.toLocaleString()} USD`); })
+                .on("mousemove", e => tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"))
+                .on("mouseleave", function() { d3.select(this).attr("opacity", 1); tooltip.style("opacity", 0); });
+                
+            bars.transition().duration(1000).delay((d, i) => i * 150).attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
                 
             const legend = svg.append("g").attr("transform", `translate(${width + 10}, 0)`);
             subgroups.forEach((key, i) => {
-                legend.append("rect").attr("y", i * 20).attr("width", 12).attr("height", 12).attr("fill", colors[key]).attr("rx", 2);
-                legend.append("text").attr("x", 20).attr("y", i * 20 + 10).style("fill", "#cbd5e1").style("font-size", "12px").text(key);
+                const groupClass = `.bar-group-${key.replace(/ /g, '').replace(/&/g, '')}`;
+                const legendItem = legend.append("g").attr("class", "legend-item")
+                    .on("mouseover", function() { svg.selectAll("rect").style("opacity", 0.1); svg.selectAll(groupClass).style("opacity", 1); })
+                    .on("mouseleave", function() { svg.selectAll("rect").style("opacity", 1); });
+                    
+                legendItem.append("rect").attr("y", i * 20).attr("width", 12).attr("height", 12).attr("fill", colors[key]).attr("rx", 2);
+                legendItem.append("text").attr("x", 20).attr("y", i * 20 + 10).style("fill", "#cbd5e1").style("font-size", "12px").text(key);
             });
         }
 
         function drawSalaryChart() {
             const container = document.getElementById('chart-salary');
-            const margin = {top: 20, right: 100, bottom: 30, left: 50},
-                  width = container.clientWidth - margin.left - margin.right,
-                  height = container.clientHeight - margin.top - margin.bottom;
-
-            const svg = d3.select("#chart-salary").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
+            const margin = {top: 20, right: 100, bottom: 30, left: 50}, width = container.clientWidth - margin.left - margin.right, height = container.clientHeight - margin.top - margin.bottom;
+            const svg = d3.select("#chart-salary").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
             const x = d3.scaleLinear().domain(d3.extent(salaryData, d => d.year)).range([0, width]);
             const y = d3.scaleLinear().domain([85000, 105000]).range([height, 0]);
 
@@ -361,46 +321,31 @@
             svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
 
             ["Data & AI", "Software Dev", "Infra & Ops"].forEach((cat, index) => {
-                // Linea
-                const path = svg.append("path").datum(salaryData)
-                    .attr("fill", "none").attr("stroke", colors[cat]).attr("stroke-width", 3)
-                    .attr("d", d3.line().curve(d3.curveMonotoneX).x(d => x(d.year)).y(d => y(d[cat])));
-                
+                const lineClass = `line-${cat.replace(/ /g, '').replace(/&/g, '')}`;
+                const path = svg.append("path").datum(salaryData).attr("class", lineClass).attr("fill", "none").attr("stroke", colors[cat]).attr("stroke-width", 3).attr("d", d3.line().curve(d3.curveMonotoneX).x(d => x(d.year)).y(d => y(d[cat])));
                 const totalLength = path.node().getTotalLength();
-                path.attr("stroke-dasharray", totalLength + " " + totalLength)
-                    .attr("stroke-dashoffset", totalLength)
-                    .transition().duration(2000).delay(index * 200).ease(d3.easeCubicInOut)
-                    .attr("stroke-dashoffset", 0);
+                path.attr("stroke-dasharray", totalLength + " " + totalLength).attr("stroke-dashoffset", totalLength).transition().duration(2000).delay(index * 200).ease(d3.easeCubicInOut).attr("stroke-dashoffset", 0);
                 
-                // NUEVO: Círculos Interactivos en cada punto de datos
-                svg.selectAll("myCircles").data(salaryData).join("circle")
-                    .attr("fill", colors[cat]).attr("stroke", "#1e293b").attr("stroke-width", 2)
-                    .attr("cx", d => x(d.year)).attr("cy", d => y(d[cat])).attr("r", 5)
-                    .style("opacity", 0)
-                    .on("mouseover", function(event, d) {
-                        d3.select(this).attr("r", 8);
-                        tooltip.style("opacity", 1).html(`<strong>${cat} (${d.year})</strong>$${d[cat].toLocaleString()} USD`);
-                    })
-                    .on("mousemove", (event) => tooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 28) + "px"))
-                    .on("mouseleave", function() {
-                        d3.select(this).attr("r", 5);
-                        tooltip.style("opacity", 0);
-                    })
+                svg.selectAll("myCircles").data(salaryData).join("circle").attr("class", lineClass)
+                    .attr("fill", colors[cat]).attr("stroke", "#1e293b").attr("stroke-width", 2).attr("cx", d => x(d.year)).attr("cy", d => y(d[cat])).attr("r", 5).style("opacity", 0)
+                    .on("mouseover", function(e, d) { d3.select(this).attr("r", 8); tooltip.style("opacity", 1).html(`<strong>${cat} (${d.year})</strong>$${d[cat].toLocaleString()} USD`); })
+                    .on("mousemove", e => tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"))
+                    .on("mouseleave", function() { d3.select(this).attr("r", 5); tooltip.style("opacity", 0); })
                     .transition().duration(500).delay(2000 + (index * 200)).style("opacity", 1);
+                    
+                const legendText = svg.append("text").attr("class", "legend-item").attr("x", width + 8).attr("y", y(salaryData[salaryData.length-1][cat])).attr("fill", colors[cat]).style("font-size", "12px").style("font-weight", "500").text(cat)
+                    .style("opacity", 0)
+                    .on("mouseover", function() { svg.selectAll("path, circle").style("opacity", 0.1); svg.selectAll(`.${lineClass}`).style("opacity", 1); })
+                    .on("mouseleave", function() { svg.selectAll("path, circle").style("opacity", 1); });
+                    
+                legendText.transition().duration(500).delay(2000 + (index * 200)).style("opacity", 1);
             });
         }
 
         function drawWorkModeChart() {
             const container = document.getElementById('chart-workmode');
-            const margin = {top: 20, right: 20, bottom: 40, left: 50},
-                  width = container.clientWidth - margin.left - margin.right,
-                  height = container.clientHeight - margin.top - margin.bottom;
-
-            const svg = d3.select("#chart-workmode").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
+            const margin = {top: 20, right: 20, bottom: 40, left: 50}, width = container.clientWidth - margin.left - margin.right, height = container.clientHeight - margin.top - margin.bottom;
+            const svg = d3.select("#chart-workmode").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
             const subgroups = ["Remoto", "Hibrido", "Presencial"];
             const groups = workModeData.map(d => d.period);
             const x = d3.scaleBand().domain(groups).range([0, width]).padding([0.2]);
@@ -410,36 +355,18 @@
             svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
             svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(5).tickFormat(d => d/1000 + "k"));
 
-            svg.append("g").selectAll("g").data(workModeData).join("g")
-                .attr("transform", d => `translate(${x(d.period)}, 0)`)
+            svg.append("g").selectAll("g").data(workModeData).join("g").attr("transform", d => `translate(${x(d.period)}, 0)`)
                 .selectAll("rect").data(d => subgroups.map(key => ({period: d.period, key: key, value: d[key]})))
-                .join("rect").attr("x", d => xSubgroup(d.key)).attr("fill", d => colors[d.key]).attr("rx", 3)
-                .attr("width", xSubgroup.bandwidth())
-                .attr("y", height).attr("height", 0)
-                // INTERACTIVIDAD
-                .on("mouseover", function(event, d) {
-                    d3.select(this).attr("opacity", 0.7);
-                    tooltip.style("opacity", 1).html(`<strong>${d.key} (${d.period})</strong>${d.value.toLocaleString()} registros`);
-                })
-                .on("mousemove", (event) => tooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 28) + "px"))
-                .on("mouseleave", function() {
-                    d3.select(this).attr("opacity", 1);
-                    tooltip.style("opacity", 0);
-                })
-                .transition().duration(1000).delay((d, i) => i * 150)
-                .attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
+                .join("rect").attr("x", d => xSubgroup(d.key)).attr("fill", d => colors[d.key]).attr("rx", 3).attr("width", xSubgroup.bandwidth()).attr("y", height).attr("height", 0)
+                .on("mouseover", function(e, d) { d3.select(this).attr("opacity", 0.7); tooltip.style("opacity", 1).html(`<strong>${d.key} (${d.period})</strong>${d.value.toLocaleString()} registros`); })
+                .on("mousemove", e => tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"))
+                .on("mouseleave", function() { d3.select(this).attr("opacity", 1); tooltip.style("opacity", 0); })
+                .transition().duration(1000).delay((d, i) => i * 150).attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
         }
 
-        function renderAllD3() {
-            drawRolesDemandChart(); drawCountryRolesChart(); drawSalaryChart(); drawWorkModeChart(); 
-        }
-
+        function renderAllD3() { drawRolesDemandChart(); drawCountryRolesChart(); drawSalaryChart(); drawWorkModeChart(); }
         renderAllD3();
-        
-        window.addEventListener("resize", () => {
-            d3.selectAll(".d3-chart svg").remove();
-            renderAllD3();
-        });
+        window.addEventListener("resize", () => { d3.selectAll(".d3-chart svg").remove(); renderAllD3(); });
     </script>
 </body>
 </html>
