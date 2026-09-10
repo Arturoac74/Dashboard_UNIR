@@ -106,14 +106,14 @@
             <div id="chart-skills-correlation" class="d3-chart tall"></div>
         </div>
 
-        <!-- NUEVO PANEL: Curva Salarial por Seniority (TFE) -->
+        <!-- Curva Salarial por Seniority -->
         <div class="panel">
             <h2>Brecha Salarial por Nivel de Experiencia (Seniority)</h2>
             <div class="panel-subtitle">Evolución de la mediana salarial (USD) según jerarquía profesional</div>
             <div id="chart-seniority" class="d3-chart"></div>
         </div>
 
-        <!-- NUEVO PANEL: Adopción de Inteligencia Artificial (TFE) -->
+        <!-- Adopción de Inteligencia Artificial (Ajustado) -->
         <div class="panel">
             <h2>Nivel de Adopción de Herramientas de IA</h2>
             <div class="panel-subtitle">Frecuencia de uso diario de asistentes (Copilot / ChatGPT) en desarrolladores</div>
@@ -175,16 +175,18 @@
             { skill: "HTML/CSS", demand: 9800, salary: 78000, category: "Software Dev" }
         ];
 
-        // NUEVOS DATOS TFE: Seniority y Adopción de IA
         const seniorityData = [
             { level: "Junior", mediana_usd: 63542 }, { level: "Mid / Semi-Senior", mediana_usd: 79970 },
             { level: "Senior", mediana_usd: 107619 }, { level: "Lead / C-Suite", mediana_usd: 146926 }
         ];
 
+        // Datos de IA con descripciones adaptadas para escritorio y móvil
         const aiAdoptionData = [
-            { nivel: "Nunca / Esporádico (0-1)", porcentaje: 7.1 }, { nivel: "Ocasional (2)", porcentaje: 8.2 },
-            { nivel: "Diario / Moderado (3)", porcentaje: 17.8 }, { nivel: "Constante (4)", porcentaje: 23.5 },
-            { nivel: "Indispensable / Total (5)", porcentaje: 43.3 }
+            { nivel: "Nunca / Esporádico (0-1)", nivel_movil: "0-1: Esporádico", porcentaje: 7.1 }, 
+            { nivel: "Ocasional (2)", nivel_movil: "2: Ocasional", porcentaje: 8.2 },
+            { nivel: "Diario / Moderado (3)", nivel_movil: "3: Moderado", porcentaje: 17.8 }, 
+            { nivel: "Constante (4)", nivel_movil: "4: Constante", porcentaje: 23.5 },
+            { nivel: "Indispensable / Total (5)", nivel_movil: "5: Indispensable", porcentaje: 43.3 }
         ];
 
         const rolesDemandData = [
@@ -212,7 +214,6 @@
             {"period": "2025-26", "Remoto": 8624, "Hibrido": 8476, "Presencial": 8703}
         ];
 
-        // ACTUALIZACIÓN DE EXPORTACIÓN A EXCEL CON NUEVAS PESTAÑAS
         function exportAllDataToExcel() {
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(salaryData), "Salarios_Historicos");
@@ -278,7 +279,6 @@
                 .style("opacity", 0).transition().duration(1000).delay((d, i) => (i * 100) + 500).style("opacity", 1);
         }
 
-        // NUEVO GRÁFICO: Seniority vs Salario
         function drawSeniorityChart() {
             const container = document.getElementById('chart-seniority');
             const isMobile = window.innerWidth <= 600;
@@ -305,24 +305,26 @@
                 .attr("y", d => y(d.mediana_usd)).attr("height", d => height - y(d.mediana_usd));
         }
 
-        // NUEVO GRÁFICO: Adopción de IA
+        // GRÁFICO DE IA CON MARGEN IZQUIERDO AMPLIADO Y ETIQUETAS ADAPTATIVAS
         function drawAIAdoptionChart() {
             const container = document.getElementById('chart-ai-adoption');
             const isMobile = window.innerWidth <= 600;
-            const margin = {top: 20, right: 20, bottom: 40, left: isMobile ? 55 : 65};
+            // Margen izquierdo optimizado (130px en escritorio para que quepan textos largos, 95px en móvil)
+            const margin = {top: 20, right: 15, bottom: 40, left: isMobile ? 100 : 135};
             const width = container.clientWidth - margin.left - margin.right;
             const height = container.clientHeight - margin.top - margin.bottom;
             const svg = d3.select("#chart-ai-adoption").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
             
             const x = d3.scaleLinear().domain([0, 50]).range([0, width]);
-            const y = d3.scaleBand().domain(aiAdoptionData.map(d => d.nivel)).range([height, 0]).padding(0.25);
+            // Selecciona la propiedad corta en móvil y la completa en escritorio
+            const y = d3.scaleBand().domain(aiAdoptionData.map(d => isMobile ? d.nivel_movil : d.nivel)).range([height, 0]).padding(0.25);
 
             svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(5).tickFormat(d => d + "%"));
             svg.append("g").attr("class", "axis").call(d3.axisLeft(y)).selectAll("text").style("font-size", isMobile ? "9px" : "11px");
             svg.append("g").attr("class", "grid").call(d3.axisBottom(x).tickSize(-height).tickFormat(""));
 
             svg.selectAll("rect").data(aiAdoptionData).join("rect")
-                .attr("x", 0).attr("y", d => y(d.nivel)).attr("height", y.bandwidth())
+                .attr("x", 0).attr("y", d => y(isMobile ? d.nivel_movil : d.nivel)).attr("height", y.bandwidth())
                 .attr("fill", "#34d399").attr("rx", 3).attr("width", 0)
                 .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("fill", "#6ee7b7"); tooltip.style("opacity", 1).html(`<strong>${d.nivel}</strong>Participación: ${d.porcentaje}% de desarrolladores`); }})
                 .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
