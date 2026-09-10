@@ -113,7 +113,7 @@
             <div id="chart-seniority" class="d3-chart"></div>
         </div>
 
-        <!-- Adopción de Inteligencia Artificial (Ajustado) -->
+        <!-- Adopción de Inteligencia Artificial -->
         <div class="panel">
             <h2>Nivel de Adopción de Herramientas de IA</h2>
             <div class="panel-subtitle">Frecuencia de uso diario de asistentes (Copilot / ChatGPT) en desarrolladores</div>
@@ -180,7 +180,6 @@
             { level: "Senior", mediana_usd: 107619 }, { level: "Lead / C-Suite", mediana_usd: 146926 }
         ];
 
-        // Datos de IA con descripciones adaptadas para escritorio y móvil
         const aiAdoptionData = [
             { nivel: "Nunca / Esporádico (0-1)", nivel_movil: "0-1: Esporádico", porcentaje: 7.1 }, 
             { nivel: "Ocasional (2)", nivel_movil: "2: Ocasional", porcentaje: 8.2 },
@@ -257,7 +256,16 @@
             svg.append("g").attr("class", "grid").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).tickSize(-height).tickFormat(""));
 
             svg.append("text").attr("text-anchor", "end").attr("x", width).attr("y", height + 35).attr("fill", "#94a3b8").style("font-size", isMobile ? "10px" : "12px").text("Volumen de Ofertas");
-            svg.append("text").attr("text-anchor", "end").attr("transform", "rotate(-90)").attr("y", isMobile ? -35 : -45).attr("x", 0).attr("fill", "#94a3b8").style("font-size", isMobile ? "10px" : "12px").text("Salario Estimado (USD)");
+            
+            // TEXTO DEL EJE VERTICAL PERFECTAMENTE CENTRADO
+            svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .attr("y", isMobile ? -32 : -45)
+                .attr("x", -(height / 2))
+                .attr("fill", "#94a3b8")
+                .style("font-size", isMobile ? "10px" : "12px")
+                .text("Salario Estimado (USD)");
 
             svg.append("line").attr("class", "quadrant-bg").attr("x1", x(6500)).attr("y1", 0).attr("x2", x(6500)).attr("y2", height);
             svg.append("line").attr("class", "quadrant-bg").attr("x1", 0).attr("y1", y(110000)).attr("x2", width).attr("y2", y(110000));
@@ -305,18 +313,15 @@
                 .attr("y", d => y(d.mediana_usd)).attr("height", d => height - y(d.mediana_usd));
         }
 
-        // GRÁFICO DE IA CON MARGEN IZQUIERDO AMPLIADO Y ETIQUETAS ADAPTATIVAS
         function drawAIAdoptionChart() {
             const container = document.getElementById('chart-ai-adoption');
             const isMobile = window.innerWidth <= 600;
-            // Margen izquierdo optimizado (130px en escritorio para que quepan textos largos, 95px en móvil)
             const margin = {top: 20, right: 15, bottom: 40, left: isMobile ? 100 : 135};
             const width = container.clientWidth - margin.left - margin.right;
             const height = container.clientHeight - margin.top - margin.bottom;
             const svg = d3.select("#chart-ai-adoption").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
             
             const x = d3.scaleLinear().domain([0, 50]).range([0, width]);
-            // Selecciona la propiedad corta en móvil y la completa en escritorio
             const y = d3.scaleBand().domain(aiAdoptionData.map(d => isMobile ? d.nivel_movil : d.nivel)).range([height, 0]).padding(0.25);
 
             svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(5).tickFormat(d => d + "%"));
