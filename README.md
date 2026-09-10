@@ -20,3 +20,4 @@ Infra & Ops: Cloud Architects, DevOps, Ciberseguridad.
 ⚙️ Despliegue en Vercel
 Este repositorio está estructurado como una Single Page Application (SPA) estática. Para desplegarlo en Vercel, no se requieren configuraciones de Build o procesos de compilación Node.js.
 
+(Prueba de conexión)
