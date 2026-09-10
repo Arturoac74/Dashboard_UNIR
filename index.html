@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Analítico: Mercado Digital (2020-2026)</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 40px;
+        }
+        .header {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+        .header h1 { margin: 0; font-weight: 400; color: #ffffff; letter-spacing: 0.5px; }
+        .header p { color: #888888; margin-top: 5px; font-size: 14px;}
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        .panel {
+            background-color: #242424;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+            border: 1px solid #333;
+        }
+        .panel.full { grid-column: span 2; }
+        .panel h2 {
+            font-size: 16px;
+            margin-top: 0;
+            font-weight: 500;
+            color: #f1f1f1;
+            margin-bottom: 15px;
+        }
+        .panel-description {
+            font-size: 13px;
+            color: #aaaaaa;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background-color: #1e1e1e;
+            border-left: 3px solid #1e88e5;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        #chart-map { width: 100%; height: 420px; }
+        .d3-chart { width: 100%; height: 320px; }
+        
+        .axis text { fill: #999999; font-size: 11px; }
+        .axis path, .axis line { stroke: #444; }
+        
+        .google-visualization-tooltip {
+            background-color: #1e1e1e !important;
+            border: 1px solid #444 !important;
+            color: #fff !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+        }
+        .google-visualization-tooltip-item span { color: #fff !important; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Análisis del Mercado Laboral Tecnológico</h1>
+        <p>Evolución Salarial, Volumetría de Demanda y Distribución Geográfica (2020-2026)</p>
+    </div>
+    
+    <div class="dashboard">
+        <!-- Mapa Global con Descripción -->
+        <div class="panel full">
+            <h2>Distribución Salarial Global Promedio (USD)</h2>
+            <div class="panel-description">
+                <strong>Insight Analítico:</strong> El mapa ilustra la densidad de compensación anual en el sector tecnológico. Las tonalidades azules más intensas revelan los polos de mayor retribución financiera (liderados por <strong>Estados Unidos, Singapur y Australia</strong> superando los $110k USD promedio). Por el contrario, mercados emergentes de alta tracción operativa como <strong>Brasil e India</strong> muestran niveles salariales más conservadores, convirtiéndolos en focos estratégicos para el <em>outsourcing</em> de talento IT.
+            </div>
+            <div id="chart-map"></div>
+        </div>
+        
+        <!-- Nuevo Gráfico: Demanda de Puestos -->
+        <div class="panel full">
+            <h2>Volumen de Puestos Requeridos (Demanda por Rol Tecnológico)</h2>
+            <div id="chart-roles-demand" class="d3-chart" style="height: 350px;"></div>
+        </div>
+
+        <!-- Gráfico: Roles por País -->
+        <div class="panel full">
+            <h2>Salarios por Macro-Categoría y País Top (Stack Overflow & Kaggle)</h2>
+            <div id="chart-country-roles" class="d3-chart" style="height: 350px;"></div>
+        </div>
+        
+        <!-- Gráficos Inferiores -->
+        <div class="panel">
+            <h2>Evolución Salarial Histórica (USD)</h2>
+            <div id="chart-salary" class="d3-chart"></div>
+        </div>
+        <div class="panel">
+            <h2>Modalidad de Trabajo por Periodo</h2>
+            <div id="chart-workmode" class="d3-chart"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. GOOGLE CHARTS (MAPA GEOESPACIAL) ---
+        google.charts.load('current', { 'packages': ['geochart'] });
+        google.charts.setOnLoadCallback(drawRegionsMap);
+
+        function drawRegionsMap() {
+            var data = google.visualization.arrayToDataTable([
+                ['País', 'Salario Promedio (USD)'],
+                ['United States', 132995], ['Singapore', 116955], ['Australia', 110550],
+                ['Canada', 108671], ['United Kingdom', 102826], ['Netherlands', 102379],
+                ['Germany', 100008], ['Japan', 98508], ['France', 95170],
+                ['United Arab Emirates', 93508], ['Brazil', 53705], ['India', 43106]
+            ]);
+
+            var options = {
+                backgroundColor: 'transparent',
+                datalessRegionColor: '#333333',
+                defaultColor: '#f5f5f5',
+                colorAxis: { colors: ['#42a5f5', '#1e88e5', '#0a306c'] },
+                legend: { textStyle: { color: '#aaaaaa' } }
+            };
+
+            var chart = new google.visualization.GeoChart(document.getElementById('chart-map'));
+            chart.draw(data, options);
+            window.addEventListener('resize', () => chart.draw(data, options));
+        }
+
+        // --- 2. D3.JS (DATOS Y LÓGICA) ---
+        
+        const colors = {
+            "Data & AI": "#00e5ff",
+            "Software Dev": "#ff4081",
+            "Infra & Ops": "#ffd600",
+            "Remoto": "#00e5ff",
+            "Hibrido": "#ff4081",
+            "Presencial": "#ffd600"
+        };
+
+        // Datos Nuevos: Demanda de Puestos (Stack Overflow Limpio)
+        const rolesDemandData = [
+            {"role": "Full-Stack Dev", "count": 12351},
+            {"role": "Back-End Dev", "count": 6453},
+            {"role": "Software Architect", "count": 2684},
+            {"role": "Front-End Dev", "count": 1974},
+            {"role": "Desktop/Enterprise Dev", "count": 1919},
+            {"role": "Mobile Dev", "count": 1391},
+            {"role": "Embedded Systems", "count": 1274},
+            {"role": "Engineering Manager", "count": 1068},
+            {"role": "DevOps Engineer", "count": 1053},
+            {"role": "Data Engineer", "count": 770},
+            {"role": "AI / ML Engineer", "count": 677}
+        ];
+
+        const countryRolesData = [
+            {"country": "USA", "Data & AI": 170102, "Software Dev": 188450, "Infra & Ops": 246893},
+            {"country": "UK", "Data & AI": 143641, "Software Dev": 112122, "Infra & Ops": 112377},
+            {"country": "Canadá", "Data & AI": 113483, "Software Dev": 102925, "Infra & Ops": 138892},
+            {"country": "Alemania", "Data & AI": 94432, "Software Dev": 87014, "Infra & Ops": 155029},
+            {"country": "Francia", "Data & AI": 79854, "Software Dev": 76026, "Infra & Ops": 107816},
+            {"country": "India", "Data & AI": 23240, "Software Dev": 50323, "Infra & Ops": 16762}
+        ];
+
+        const salaryData = [
+            {"year": 2020, "Data & AI": 95892, "Software Dev": 99904, "Infra & Ops": 89000}, 
+            {"year": 2021, "Data & AI": 95147, "Software Dev": 101214, "Infra & Ops": 91500}, 
+            {"year": 2022, "Data & AI": 95235, "Software Dev": 99248, "Infra & Ops": 92000}, 
+            {"year": 2023, "Data & AI": 94849, "Software Dev": 101259, "Infra & Ops": 94000}, 
+            {"year": 2024, "Data & AI": 94935, "Software Dev": 100408, "Infra & Ops": 95000}, 
+            {"year": 2025, "Data & AI": 95069, "Software Dev": 101168, "Infra & Ops": 96500}, 
+            {"year": 2026, "Data & AI": 95352, "Software Dev": 100387, "Infra & Ops": 97800}
+        ];
+        
+        const workModeData = [
+            {"period": "20-22 (Pandemia)", "Remoto": 12931, "Hibrido": 12837, "Presencial": 12845}, 
+            {"period": "23-24 (Remoto)", "Remoto": 8450, "Hibrido": 8449, "Presencial": 8685}, 
+            {"period": "25-26 (IA)", "Remoto": 8624, "Hibrido": 8476, "Presencial": 8703}
+        ];
+
+        // --- Gráfico: Demanda de Roles (Horizontal Bar Chart) ---
+        function drawRolesDemandChart() {
+            const container = document.getElementById('chart-roles-demand');
+            const margin = {top: 10, right: 40, bottom: 20, left: 160},
+                  width = container.clientWidth - margin.left - margin.right,
+                  height = container.clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select("#chart-roles-demand").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+            rolesDemandData.sort((a, b) => a.count - b.count); 
+            const x = d3.scaleLinear().domain([0, d3.max(rolesDemandData, d => d.count) + 1500]).range([0, width]);
+            const y = d3.scaleBand().domain(rolesDemandData.map(d => d.role)).range([height, 0]).padding(0.25);
+
+            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(8));
+            svg.append("g").attr("class", "axis").call(d3.axisLeft(y));
+
+            svg.selectAll("rect").data(rolesDemandData).join("rect")
+                .attr("x", 0).attr("y", d => y(d.role)).attr("width", d => x(d.count))
+                .attr("height", y.bandwidth()).attr("fill", "#00e676").attr("rx", 3);
+                
+            svg.selectAll(".label").data(rolesDemandData).join("text")
+                .attr("x", d => x(d.count) + 8).attr("y", d => y(d.role) + y.bandwidth() / 2 + 4)
+                .attr("fill", "#ccc").style("font-size", "11px").text(d => d.count.toLocaleString());
+        }
+
+        // --- Gráfico de Barras Agrupadas: Roles por País ---
+        function drawCountryRolesChart() {
+            const container = document.getElementById('chart-country-roles');
+            const margin = {top: 20, right: 120, bottom: 40, left: 60},
+                  width = container.clientWidth - margin.left - margin.right,
+                  height = container.clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select("#chart-country-roles").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const subgroups = ["Data & AI", "Software Dev", "Infra & Ops"];
+            const groups = countryRolesData.map(d => d.country);
+
+            const x = d3.scaleBand().domain(groups).range([0, width]).padding([0.15]);
+            const xSubgroup = d3.scaleBand().domain(subgroups).range([0, x.bandwidth()]).padding([0.05]);
+            const y = d3.scaleLinear().domain([0, 260000]).range([height, 0]);
+
+            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+            svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(6).tickFormat(d => "$" + d / 1000 + "k"));
+
+            svg.append("g").attr("class", "grid")
+                .call(d3.axisLeft(y).tickSize(-width).tickFormat("")).selectAll("line").attr("stroke", "#333").attr("stroke-dasharray", "3,3");
+
+            svg.append("g").selectAll("g").data(countryRolesData).join("g")
+                .attr("transform", d => `translate(${x(d.country)}, 0)`)
+                .selectAll("rect").data(d => subgroups.map(key => ({key: key, value: d[key]})))
+                .join("rect").attr("x", d => xSubgroup(d.key)).attr("y", d => y(d.value))
+                .attr("width", xSubgroup.bandwidth()).attr("height", d => height - y(d.value))
+                .attr("fill", d => colors[d.key]).attr("rx", 2);
+                
+            const legend = svg.append("g").attr("transform", `translate(${width + 10}, 0)`);
+            subgroups.forEach((key, i) => {
+                legend.append("rect").attr("y", i * 20).attr("width", 12).attr("height", 12).attr("fill", colors[key]);
+                legend.append("text").attr("x", 20).attr("y", i * 20 + 10).style("fill", "#ccc").style("font-size", "12px").text(key);
+            });
+        }
+
+        // --- Gráfico de Líneas: Evolución Salarial ---
+        function drawSalaryChart() {
+            const container = document.getElementById('chart-salary');
+            const margin = {top: 20, right: 100, bottom: 30, left: 50},
+                  width = container.clientWidth - margin.left - margin.right,
+                  height = container.clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select("#chart-salary").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear().domain(d3.extent(salaryData, d => d.year)).range([0, width]);
+            const y = d3.scaleLinear().domain([85000, 105000]).range([height, 0]);
+
+            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).tickFormat(d3.format("d")).ticks(7));
+            svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(5).tickFormat(d => "$" + d/1000 + "k"));
+
+            ["Data & AI", "Software Dev", "Infra & Ops"].forEach(cat => {
+                svg.append("path").datum(salaryData)
+                    .attr("fill", "none").attr("stroke", colors[cat]).attr("stroke-width", 3)
+                    .attr("d", d3.line().curve(d3.curveMonotoneX).x(d => x(d.year)).y(d => y(d[cat])));
+                
+                svg.append("text").attr("x", width + 8).attr("y", y(salaryData[salaryData.length-1][cat]))
+                    .attr("fill", colors[cat]).style("font-size", "12px").style("font-weight", "500").text(cat);
+            });
+        }
+
+        // --- Gráfico de Barras Apiladas: Modalidad de Trabajo ---
+        function drawWorkModeChart() {
+            const container = document.getElementById('chart-workmode');
+            const margin = {top: 20, right: 20, bottom: 40, left: 50},
+                  width = container.clientWidth - margin.left - margin.right,
+                  height = container.clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select("#chart-workmode").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const subgroups = ["Remoto", "Hibrido", "Presencial"];
+            const groups = workModeData.map(d => d.period);
+            const x = d3.scaleBand().domain(groups).range([0, width]).padding([0.2]);
+            const xSubgroup = d3.scaleBand().domain(subgroups).range([0, x.bandwidth()]).padding([0.05]);
+            const y = d3.scaleLinear().domain([0, 14000]).range([height, 0]);
+
+            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+            svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(5).tickFormat(d => d/1000 + "k"));
+
+            svg.append("g").selectAll("g").data(workModeData).join("g")
+                .attr("transform", d => `translate(${x(d.period)}, 0)`)
+                .selectAll("rect").data(d => subgroups.map(key => ({key: key, value: d[key]})))
+                .join("rect").attr("x", d => xSubgroup(d.key)).attr("y", d => y(d.value))
+                .attr("width", xSubgroup.bandwidth()).attr("height", d => height - y(d.value))
+                .attr("fill", d => colors[d.key]).attr("rx", 2);
+                
+            const legend = svg.append("g").attr("transform", `translate(${width - 80}, -10)`);
+            subgroups.forEach((key, i) => {
+                legend.append("rect").attr("y", i * 15).attr("width", 10).attr("height", 10).attr("fill", colors[key]);
+                legend.append("text").attr("x", 15).attr("y", i * 15 + 9).style("fill", "#aaa").style("font-size", "11px").text(key);
+            });
+        }
+
+        function renderAllD3() {
+            drawRolesDemandChart();
+            drawCountryRolesChart(); 
+            drawSalaryChart(); 
+            drawWorkModeChart(); 
+        }
+
+        renderAllD3();
+        
+        window.addEventListener("resize", () => {
+            d3.selectAll(".d3-chart svg").remove();
+            renderAllD3();
+        });
+    </script>
+</body>
+</html>
