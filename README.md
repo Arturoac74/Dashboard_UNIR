@@ -19,4 +19,4 @@ Software Dev: Frontend, Backend, Full-Stack, Mobile Developers.
 Infra & Ops: Cloud Architects, DevOps, Ciberseguridad.
 ⚙️ Despliegue en Vercel
 Este repositorio está estructurado como una Single Page Application (SPA) estática. Para desplegarlo en Vercel, no se requieren configuraciones de Build o procesos de compilación Node.js.
-<img width="442" height="611" alt="image" src="https://github.com/user-attachments/assets/44153cce-7b2a-4cce-b75f-7c00026b0305" />
+
