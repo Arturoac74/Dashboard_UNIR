@@ -157,13 +157,14 @@
         const mapColors = ['#1e293b', '#3b82f6', '#93c5fd'];
         const tooltip = d3.select("#d3-tooltip");
 
+        // Países traducidos al español para Google Charts (Geochart reconoce nombres en castellano)
         const mapDataRAW = [
-            { Pais: 'United States', Salario_Promedio_USD: 132995 }, { Pais: 'Singapore', Salario_Promedio_USD: 116955 },
-            { Pais: 'Australia', Salario_Promedio_USD: 110550 }, { Pais: 'Canada', Salario_Promedio_USD: 108671 },
-            { Pais: 'United Kingdom', Salario_Promedio_USD: 102826 }, { Pais: 'Netherlands', Salario_Promedio_USD: 102379 },
-            { Pais: 'Germany', Salario_Promedio_USD: 100008 }, { Pais: 'Japan', Salario_Promedio_USD: 98508 },
-            { Pais: 'France', Salario_Promedio_USD: 95170 }, { Pais: 'United Arab Emirates', Salario_Promedio_USD: 93508 },
-            { Pais: 'Brazil', Salario_Promedio_USD: 53705 }, { Pais: 'India', Salario_Promedio_USD: 43106 }
+            { Pais: 'Estados Unidos', Salario_Promedio_USD: 132995 }, { Pais: 'Singapur', Salario_Promedio_USD: 116955 },
+            { Pais: 'Australia', Salario_Promedio_USD: 110550 }, { Pais: 'Canadá', Salario_Promedio_USD: 108671 },
+            { Pais: 'Reino Unido', Salario_Promedio_USD: 102826 }, { Pais: 'Países Bajos', Salario_Promedio_USD: 102379 },
+            { Pais: 'Alemania', Salario_Promedio_USD: 100008 }, { Pais: 'Japón', Salario_Promedio_USD: 98508 },
+            { Pais: 'Francia', Salario_Promedio_USD: 95170 }, { Pais: 'Emiratos Árabes Unidos', Salario_Promedio_USD: 93508 },
+            { Pais: 'Brasil', Salario_Promedio_USD: 53705 }, { Pais: 'India', Salario_Promedio_USD: 43106 }
         ];
 
         const skillsCorrelationData = [
@@ -257,7 +258,6 @@
 
             svg.append("text").attr("text-anchor", "end").attr("x", width).attr("y", height + 35).attr("fill", "#94a3b8").style("font-size", isMobile ? "10px" : "12px").text("Volumen de Ofertas");
             
-            // TEXTO DEL EJE VERTICAL PERFECTAMENTE CENTRADO
             svg.append("text")
                 .attr("text-anchor", "middle")
                 .attr("transform", "rotate(-90)")
