@@ -1,3 +1,5 @@
+index.html
+100%
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,581 +7,195 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard Analítico: Mercado Digital (2020-2026)</title>
     
+    <link rel="stylesheet" href="style.css">
+   
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <style>
-        /* ESTILO CYBERPUNK NEÓN (INSPIRADO EN LA PLANTILLA) */
-        body { 
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background-color: #060913; 
-            color: #f1f5f9; 
-            margin: 0; 
-            padding: 30px; 
-        }
-        
-        /* CABECERA CON ESTILO DE PANEL DE CONTROL */
-        .top-navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #0d1424;
-            border: 1px solid #1e293b;
-            padding: 12px 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.05);
-        }
-        .nav-title { font-weight: 700; color: #38bdf8; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
-        .nav-info { color: #94a3b8; font-size: 13px; display: flex; gap: 15px; align-items: center; }
-
-        .header-container { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-end; 
-            margin-bottom: 25px; 
-            border-bottom: 1px solid #1e293b; 
-            padding-bottom: 15px; 
-        }
-        .header-text h1 { margin: 0; font-weight: 600; color: #f8fafc; font-size: 22px; letter-spacing: -0.5px; }
-        .header-text p { color: #94a3b8; margin-top: 5px; font-size: 13px; margin-bottom: 0;}
-        
-        /* FILTROS Y BOTÓN CON BORDES LUMINOSOS */
-        .controls-wrapper { display: flex; gap: 15px; align-items: flex-end; }
-        .filter-group { display: flex; flex-direction: column; gap: 5px; }
-        .filter-group label { font-size: 10px; color: #38bdf8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        .select-filter { background-color: #0d1424; color: #f8fafc; border: 1px solid #334155; padding: 10px 14px; border-radius: 8px; font-size: 12px; outline: none; cursor: pointer; transition: all 0.2s; height: 38px; }
-        .select-filter:focus { border-color: #38bdf8; box-shadow: 0 0 8px rgba(56, 189, 248, 0.4); }
-
-        .btn-export { background: linear-gradient(135deg, #0ea5e9, #2563eb); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; height: 38px; box-shadow: 0 0 10px rgba(14, 165, 233, 0.3); }
-        .btn-export:hover { transform: translateY(-2px); box-shadow: 0 0 15px rgba(56, 189, 248, 0.6); }
-        
-        /* TARJETAS DE KPIS CON BORDES NEÓN DE COLORES */
-        .kpi-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
-        .kpi-card { 
-            background: #0d1424; 
-            border-radius: 12px; 
-            padding: 20px; 
-            border: 1px solid #1e293b; 
-            box-shadow: inset 0 0 10px rgba(255,255,255,0.02); 
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s; 
-        }
-        .kpi-card:hover { transform: translateY(-3px); }
-        
-        /* Bordes luminosos individuales estilo plantilla */
-        .kpi-card:nth-child(1) { border-left: 4px solid #00f2fe; box-shadow: -5px 0 15px rgba(0, 242, 254, 0.15); }
-        .kpi-card:nth-child(2) { border-left: 4px solid #f59e0b; box-shadow: -5px 0 15px rgba(245, 158, 11, 0.15); }
-        .kpi-card:nth-child(3) { border-left: 4px solid #10b981; box-shadow: -5px 0 15px rgba(16, 185, 129, 0.15); }
-        
-        .kpi-title { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;}
-        .kpi-value { font-size: 28px; font-weight: 800; color: #f8fafc; display: flex; align-items: baseline; gap: 6px; margin-top: 8px;}
-        .kpi-sub { font-size: 12px; color: #34d399; font-weight: 600; }
-
-        /* GRILLA DE PANELES MODULARES OSCUROS */
-        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        .panel { 
-            background-color: #0d1424; 
-            border-radius: 12px; 
-            padding: 22px; 
-            border: 1px solid #1e293b; 
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            overflow: hidden; 
-        }
-        .panel.full { grid-column: span 2; }
-        
-        .panel h2 { font-size: 15px; margin-top: 0; font-weight: 600; color: #f8fafc; margin-bottom: 4px; }
-        .panel-subtitle { font-size: 11px; color: #94a3b8; margin-bottom: 12px; font-weight: 400; }
-        .panel-description { font-size: 12px; color: #cbd5e1; line-height: 1.5; margin-bottom: 15px; padding: 10px 12px; background-color: #060913; border-left: 3px solid #00f2fe; border-radius: 0 6px 6px 0; }
-        
-        #chart-map { width: 100%; height: 400px; }
-        .d3-chart { width: 100%; height: 300px; }
-        .d3-chart.tall { height: 420px; }
-        
-        .axis text { fill: #94a3b8; font-size: 10px; }
-        .axis path, .axis line { stroke: #334155; }
-        .grid line { stroke: #162032; stroke-dasharray: 4,4; }
-        
-        .d3-tooltip { position: absolute; background-color: #060913; border: 1px solid #00f2fe; color: #f1f5f9; padding: 8px 12px; border-radius: 6px; font-size: 12px; pointer-events: none; opacity: 0; box-shadow: 0 0 12px rgba(0,242,254,0.3); z-index: 1000; transition: opacity 0.1s ease; }
-        .d3-tooltip strong { color: #00f2fe; display: block; margin-bottom: 3px;}
-        .google-visualization-tooltip { background-color: #0d1424 !important; border: 1px solid #1e293b !important; border-radius: 6px !important; }
-        .google-visualization-tooltip-item span { color: #f1f5f9 !important; }
-        
-        .quadrant-bg { fill: transparent; stroke: #1e293b; stroke-dasharray: 5,5; stroke-width: 1px; }
-        .quadrant-label { fill: #475569; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-
-        @media (max-width: 1024px) { 
-            .dashboard { grid-template-columns: 1fr; } 
-            .panel.full { grid-column: span 1; } 
-            .kpi-container { grid-template-columns: repeat(1, 1fr); } 
-            .header-container { flex-direction: column; align-items: flex-start; gap: 15px; } 
-            .controls-wrapper { width: 100%; flex-direction: column; align-items: stretch; }
-            .btn-export { width: 100%; }
-        }
-    </style>
 </head>
 <body>
-    <!-- BARRA SUPERIOR ESTILO PLANTILLA -->
-    <div class="top-navbar">
-        <div class="nav-title">TFE Analytics Dashboard</div>
-        <div class="nav-info">
-            <span>UNIR México (2026)</span>
-            <span>•</span>
-            <span>Arturo</span>
-        </div>
-    </div>
-
-    <div class="header-container">
-        <div class="header-text">
-            <h1>Panel de Control: Mercado Laboral Tecnológico</h1>
-            <p>Evolución Salarial, Volumetría, Seniority y Adopción de IA (2020-2026)</p>
-        </div>
-        
-        <div class="controls-wrapper">
-            <div class="filter-group">
-                <label for="categoryFilter">Macro-Categoría:</label>
-                <select id="categoryFilter" class="select-filter" onchange="onFilterChange()">
-                    <option value="ALL">Todas las Categorías</option>
-                    <option value="Data & AI">Ciencia de Datos & IA</option>
-                    <option value="Software Dev">Desarrollo de Software</option>
-                    <option value="Infra & Ops">Infraestructura & Operaciones</option>
-                </select>
+    <div class="app-container">
+        <!-- MENÚ LATERAL (SIDEBAR) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Dashboard IT</h2>
+                <p>Mercado Laboral</p>
             </div>
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-tab="general" onclick="switchTab('general', this)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span>Visión General</span>
+                </button>
+                <button class="nav-btn" data-tab="analytics" onclick="switchTab('analytics', this)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <span>Gráficos</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- ÁREA DE CONTENIDO PRINCIPAL -->
+        <main class="main-content">
             
-            <div class="filter-group">
-                <label for="workModeFilter">Modalidad:</label>
-                <select id="workModeFilter" class="select-filter" onchange="onFilterChange()">
-                    <option value="ALL">Todas las Modalidades</option>
-                    <option value="Remoto">Remoto</option>
-                    <option value="Hibrido">Híbrido</option>
-                    <option value="Presencial">Presencial</option>
-                </select>
+            <!-- HEADER COMÚN -->
+            <div class="header-container">
+                <div class="header-text">
+                    <h1>Dashboard Ejecutivo: Mercado Laboral Tecnológico</h1>
+                    <p>Evolución Salarial, Volumetría, Seniority y Adopción de IA (2020-2026)</p>
+                </div>
             </div>
 
-            <button class="btn-export" onclick="exportAllDataToExcel()">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:14px; height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Exportar Excel
-            </button>
-        </div>
-    </div>
+            <!-- PESTAÑA 1: VISIÓN GENERAL (MAPA E INDICADORES FIJOS) -->
+            <section id="tab-general" class="tab-content active">
+                <div class="kpi-container">
+                    <div class="kpi-card"><div class="kpi-title">Salario Top Promedio</div><div class="kpi-value">$132.9k <span class="kpi-sub">USD (USA)</span></div></div>
+                    <div class="kpi-card"><div class="kpi-title">Rol más Demandado</div><div class="kpi-value">Full-Stack <span class="kpi-sub">12.3k Puestos</span></div></div>
+                    <div class="kpi-card"><div class="kpi-title">Adopción de IA</div><div class="kpi-value">66.8% <span class="kpi-sub">Uso Diario / Total</span></div></div>
+                    <div class="kpi-card"><div class="kpi-title">Modalidad Predominante</div><div class="kpi-value">Híbrido <span class="kpi-sub">& Remoto</span></div></div>
+                </div>
 
-    <div class="kpi-container">
-        <div class="kpi-card">
-            <div class="kpi-title">Salario Top Promedio</div>
-            <div class="kpi-value">$132.9k <span class="kpi-sub">+5.8% (USA)</span></div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-title">Rol más Demandado</div>
-            <div class="kpi-value">Full-Stack <span class="kpi-sub">12.3k Puestos</span></div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-title">Adopción de IA</div>
-            <div class="kpi-value">66.8% <span class="kpi-sub">Uso Diario / Total</span></div>
-        </div>
-    </div>
-    
-    <div class="dashboard">
-        <!-- Mapa Global -->
-        <div class="panel full">
-            <h2>Distribución Salarial Global Promedio</h2>
-            <div class="panel-subtitle">Comparativa internacional de compensación anual en USD por país</div>
-            <div id="chart-map"></div>
-        </div>
-        
-        <!-- Matriz Correlación Hard Skills -->
-        <div class="panel full">
-            <h2>Matriz de Competitividad: Demanda vs. Impacto Salarial</h2>
-            <div class="panel-subtitle">Identificación de tecnologías Core de alta adopción frente a Nichos de alta especialización</div>
-            <div class="panel-description">
-                <strong>Análisis:</strong> El <strong>cuadrante superior derecho</strong> representa el "Talento Core". El <strong>cuadrante superior izquierdo</strong> revela nichos de alta especialización y salarios top (Ej. Rust, PyTorch).
-            </div>
-            <div id="chart-skills-correlation" class="d3-chart tall"></div>
-        </div>
+                <div class="dashboard">
+                    <!-- Mapa Global -->
+                    <div class="panel full">
+                        <h2>Distribución Salarial Global Promedio</h2>
+                        <div class="panel-subtitle">Comparativa internacional de compensación anual en USD por país</div>
+                        <div id="chart-map"></div>
+                    </div>
+                    <div>
+                        <h5>Fuentes: Global AI & Data Jobs Salry Dataset 2020-2026 y entrevistas de StackOverflow Developer Survey 2025 y Compensación Económica (Sysarmy). </h5>
+                    </div>
+                </div>
+            </section>
 
-        <!-- Curva Salarial por Seniority -->
-        <div class="panel">
-            <h2>Brecha Salarial por Nivel de Experiencia (Seniority)</h2>
-            <div class="panel-subtitle">Evolución de la mediana salarial (USD) según jerarquía profesional</div>
-            <div id="chart-seniority" class="d3-chart"></div>
-        </div>
+            <!-- PESTAÑA 2: GRÁFICOS DINÁMICOS & FILTROS -->
+            <section id="tab-analytics" class="tab-content">
+                
+                <!-- BARRA DE CONTROLES Y FILTROS GLOBALES -->
+                <div class="controls-wrapper" style="margin-bottom: 1.5rem;">
+                    <div class="filter-group">
+                        <label for="categoryFilter">Macro-Categoría:</label>
+                        <select id="categoryFilter" class="select-filter" onchange="onFilterChange()">
+                            <option value="ALL">Todas las Categorías</option>
+                            <option value="Data & AI">Ciencia de Datos & IA</option>
+                            <option value="Software Dev">Desarrollo de Software</option>
+                            <option value="Infra & Ops">Infraestructura & Operaciones</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="workModeFilter">Modalidad:</label>
+                        <select id="workModeFilter" class="select-filter" onchange="onFilterChange()">
+                            <option value="ALL">Todas las Modalidades</option>
+                            <option value="Remoto">Remoto</option>
+                            <option value="Hibrido">Híbrido</option>
+                            <option value="Presencial">Presencial</option>
+                        </select>
+                    </div>
 
-        <!-- Adopción de Inteligencia Artificial -->
-        <div class="panel">
-            <h2>Nivel de Adopción de Herramientas de IA</h2>
-            <div class="panel-subtitle">Frecuencia de uso diario de asistentes (Copilot / ChatGPT) en desarrolladores</div>
-            <div id="chart-ai-adoption" class="d3-chart"></div>
-        </div>
+                    <button class="btn-export" onclick="exportAllDataToExcel()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Exportar a Excel (TFE)
+                    </button>
+                </div>
 
-        <!-- Demanda de Roles -->
-        <div class="panel full">
-            <h2>Volumen de Puestos Requeridos (Demanda por Rol)</h2>
-            <div class="panel-subtitle">Desarrollo Full-Stack y Back-End lideran masivamente la captación de vacantes globales</div>
-            <div id="chart-roles-demand" class="d3-chart" style="height: 280px;"></div>
-        </div>
+                <div class="dashboard">
+                    <!-- Matriz Correlación Hard Skills -->
+                    <div class="panel full">
+                        <h2>Matriz de Competitividad: Demanda vs. Impacto Salarial</h2>
+                        <div class="panel-subtitle">Identificación de tecnologías Core de alta adopción frente a Nichos de alta especialización</div>
+                        <div class="panel-description">
+                            <strong>Análisis:</strong> El <strong>cuadrante superior derecho</strong> representa el "Talento Core". El <strong>cuadrante superior izquierdo</strong> revela nichos de alta especialización y salarios top (Ej. Rust, PyTorch).
+                        </div>
+                        <div id="chart-skills-correlation" class="d3-chart tall"></div>
+                        <div>
+                            <h6>Fuentes: Stack Overflow Developer Survey 2025 y Global AI & Job Salary Dataset(2020-2026) & Sysarmy.</h6>
+                        </div>
+                    </div>
 
-        <!-- Salarios por País y Rol -->
-        <div class="panel full">
-            <h2>Salarios por Macro-Categoría y País Top</h2>
-            <div class="panel-subtitle">Infraestructura & Ops destaca con salarios pico en mercados maduros como USA y Alemania</div>
-            <div id="chart-country-roles" class="d3-chart" style="height: 330px;"></div>
-        </div>
-        
-        <!-- Evolución Salarial -->
-        <div class="panel">
-            <h2>Evolución Salarial Histórica (2020-2026)</h2>
-            <div class="panel-subtitle">Estabilidad en la compensación promedio por categoría tras el impacto post-pandemia</div>
-            <div id="chart-salary" class="d3-chart"></div>
-        </div>
-        
-        <!-- Modalidad de Trabajo -->
-        <div class="panel">
-            <h2>Modalidad de Trabajo por Periodo</h2>
-            <div class="panel-subtitle">Transición sostenida hacia modelos híbridos y remotos consolidados hacia 2026</div>
-            <div id="chart-workmode" class="d3-chart"></div>
-        </div>
+                    <!-- Curva Salarial por Seniority -->
+                    <div class="panel">
+                        <h2>Brecha Salarial por Nivel de Experiencia (Seniority)</h2>
+                        <div class="panel-subtitle">Evolución de la mediana salarial (USD) según jerarquía profesional</div>
+                        <div id="chart-seniority" class="d3-chart"></div>
+                        <div>
+                            <h6>Fuentes: Global AI & Job Salary Dataset 2020-2026 (Kaggle) & Encuesta Semestral de Sueldos (Sysarmy).</h6>
+                        </div>
+                    </div>
+
+                    <!-- Adopción de Inteligencia Artificial -->
+                    <div class="panel">
+                        <h2>Nivel de Adopción de Herramientas de IA</h2>
+                        <div class="panel-subtitle">Frecuencia de uso diario de asistentes (Copilot / ChatGPT) en desarrolladores</div>
+                        <div id="chart-ai-adoption" class="d3-chart"></div>
+                        <div>
+                            <h6>Fuentes: Stack Overflow Developer Survey 2025 y Compensación Económica (Sysarmy) .</h6>
+                        </div>
+                    </div>
+
+                    <!-- Demanda de Roles -->
+                    <div class="panel full">
+                        <h2>Volumen de Puestos Requeridos (Demanda por Rol)</h2>
+                        <div class="panel-subtitle">Desarrollo Full-Stack y Back-End lideran masivamente la captación de vacantes globales</div>
+                        <div id="chart-roles-demand" class="d3-chart" style="height: 300px;"></div>
+                         <div style="margin-top: 10px; padding-top: 12px;">
+                            <h6>Fuentes: Global AI & Job Salary Dataset 2020-2026 (Kaggle) We Work Remotly & Stack Overflow Developer Survey 2025.</h6>
+                        </div>
+                    </div>
+
+                    <!-- Salarios por País y Rol -->
+                    <div class="panel full">
+                        <h2>Salarios por Macro-Categoría y País Top</h2>
+                        <div class="panel-subtitle">Infraestructura & Ops destaca con salarios pico en mercados maduros como USA y Alemania</div>
+                        <div id="chart-country-roles" class="d3-chart" style="height: 350px;"></div>
+                         <div>
+                            <h6>Fuentes: Global AI & Job Salary Dataset(2020-2026), Data Jobs Salary Dataset 2020-2026 (Kaggle) y encuentas de StackOverflow y Sysarmy.</h6>
+                        </div>
+                    </div>
+                    
+                    <!-- Evolución Salarial -->
+                    <div class="panel">
+                        <h2>Evolución Salarial Histórica (2020-2026)</h2>
+                        <div class="panel-subtitle">Estabilidad en la compensación promedio por categoría tras el impacto post-pandemia</div>
+                        <div id="chart-salary" class="d3-chart"></div>
+                        <div style="margin-top: 10px; padding-top: 12px;">
+                            <h6>Fuentes: Global AI & Job Salary Dataset(2020-2026) & Data Jobs Salary Dataset 2020-2026 (Kaggle).</h6>
+                        </div>
+                    </div>
+                    
+                    <!-- Modalidad de Trabajo -->
+                    <div class="panel">
+                        <h2>Modalidad de Trabajo por Periodo</h2>
+                        <div class="panel-subtitle">Transición sostenida hacia modelos híbridos y remotos consolidados hacia 2026</div>
+                        <div id="chart-workmode" class="d3-chart"></div>
+                        <div>
+                            <h6>Fuentes: Global AI & Job Salary Dataset(2020-2026), We Work Remotly y encuesta de StackOverflow Developer Survey 2025.</h6>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <!-- Tooltip -->
     <div id="d3-tooltip" class="d3-tooltip"></div>
 
+    <!-- LÓGICA DE CAMBIO DE PESTAÑAS Y RE-DIBUJADO DE GRÁFICOS -->
     <script>
-        const colors = { "Data & AI": "#00f2fe", "Software Dev": "#a78bfa", "Infra & Ops": "#f59e0b", "Remoto": "#00f2fe", "Hibrido": "#a78bfa", "Presencial": "#f59e0b", "IA": "#10b981" };
-        const mapColors = ['#060913', '#0369a1', '#00f2fe'];
-        const tooltip = d3.select("#d3-tooltip");
+        function switchTab(tabId, element) {
+            // 1. Desactivar botones y secciones
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
 
-        const mapDataRAW = [
-            { Pais: 'United States', Salario_Promedio_USD: 132995 }, { Pais: 'Singapore', Salario_Promedio_USD: 116955 },
-            { Pais: 'Australia', Salario_Promedio_USD: 110550 }, { Pais: 'Canada', Salario_Promedio_USD: 108671 },
-            { Pais: 'United Kingdom', Salario_Promedio_USD: 102826 }, { Pais: 'Netherlands', Salario_Promedio_USD: 102379 },
-            { Pais: 'Germany', Salario_Promedio_USD: 100008 }, { Pais: 'Japan', Salario_Promedio_USD: 98508 },
-            { Pais: 'France', Salario_Promedio_USD: 95170 }, { Pais: 'United Arab Emirates', Salario_Promedio_USD: 93508 },
-            { Pais: 'Brazil', Salario_Promedio_USD: 53705 }, { Pais: 'India', Salario_Promedio_USD: 43106 }
-        ];
+            // 2. Activar elemento seleccionado
+            element.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
 
-        const skillsCorrelationData = [
-            { skill: "Python", demand: 9500, salary: 118000, category: "Data & AI" }, { skill: "PyTorch", demand: 2100, salary: 145000, category: "Data & AI" },
-            { skill: "SQL", demand: 11200, salary: 95000, category: "Data & AI" }, { skill: "TypeScript", demand: 8400, salary: 112000, category: "Software Dev" },
-            { skill: "JavaScript", demand: 12000, salary: 92000, category: "Software Dev" }, { skill: "Rust", demand: 1800, salary: 138000, category: "Software Dev" },
-            { skill: "Go", demand: 3200, salary: 128000, category: "Software Dev" }, { skill: "Kubernetes", demand: 5400, salary: 132000, category: "Infra & Ops" },
-            { skill: "Docker", demand: 8900, salary: 108000, category: "Infra & Ops" }, { skill: "Terraform", demand: 4100, salary: 125000, category: "Infra & Ops" },
-            { skill: "HTML/CSS", demand: 9800, salary: 78000, category: "Software Dev" }
-        ];
-
-        const seniorityData = [
-            { level: "Junior", mediana_usd: 63542 }, { level: "Mid / Semi-Senior", mediana_usd: 79970 },
-            { level: "Senior", mediana_usd: 107619 }, { level: "Lead / C-Suite", mediana_usd: 146926 }
-        ];
-
-        const aiAdoptionData = [
-            { nivel: "Nunca / Esporádico (0-1)", nivel_movil: "0-1: Esporádico", porcentaje: 7.1 }, 
-            { nivel: "Ocasional (2)", nivel_movil: "2: Ocasional", porcentaje: 8.2 },
-            { nivel: "Diario / Moderado (3)", nivel_movil: "3: Moderado", porcentaje: 17.8 }, 
-            { nivel: "Constante (4)", nivel_movil: "4: Constante", porcentaje: 23.5 },
-            { nivel: "Indispensable / Total (5)", nivel_movil: "5: Indispensable", porcentaje: 43.3 }
-        ];
-
-        const rolesDemandData = [
-            {"role": "Full-Stack Dev", "count": 12351, category: "Software Dev"}, {"role": "Back-End Dev", "count": 6453, category: "Software Dev"}, {"role": "Software Architect", "count": 2684, category: "Software Dev"}, 
-            {"role": "Front-End Dev", "count": 1974, category: "Software Dev"}, {"role": "Desktop/Enterprise Dev", "count": 1919, category: "Software Dev"}, {"role": "Mobile Dev", "count": 1391, category: "Software Dev"},
-            {"role": "Embedded Systems", "count": 1274, category: "Infra & Ops"}, {"role": "Engineering Manager", "count": 1068, category: "Software Dev"}, {"role": "DevOps Engineer", "count": 1053, category: "Infra & Ops"}, 
-            {"role": "Data Engineer", "count": 770, category: "Data & AI"}, {"role": "AI / ML Engineer", "count": 677, category: "Data & AI"}
-        ];
-        
-        const countryRolesData = [
-            {"country": "USA", "Data & AI": 170102, "Software Dev": 188450, "Infra & Ops": 246893}, {"country": "UK", "Data & AI": 143641, "Software Dev": 112122, "Infra & Ops": 112377},
-            {"country": "Canadá", "Data & AI": 113483, "Software Dev": 102925, "Infra & Ops": 138892}, {"country": "Alemania", "Data & AI": 94432, "Software Dev": 87014, "Infra & Ops": 155029},
-            {"country": "Francia", "Data & AI": 79854, "Software Dev": 76026, "Infra & Ops": 107816}, {"country": "India", "Data & AI": 23240, "Software Dev": 50323, "Infra & Ops": 16762}
-        ];
-        
-        const salaryData = [
-            {"year": 2020, "Data & AI": 95892, "Software Dev": 99904, "Infra & Ops": 89000}, {"year": 2021, "Data & AI": 95147, "Software Dev": 101214, "Infra & Ops": 91500}, 
-            {"year": 2022, "Data & AI": 95235, "Software Dev": 99248, "Infra & Ops": 92000}, {"year": 2023, "Data & AI": 94849, "Software Dev": 101259, "Infra & Ops": 94000}, 
-            {"year": 2024, "Data & AI": 94935, "Software Dev": 100408, "Infra & Ops": 95000}, {"year": 2025, "Data & AI": 95069, "Software Dev": 101168, "Infra & Ops": 96500}, 
-            {"year": 2026, "Data & AI": 95352, "Software Dev": 100387, "Infra & Ops": 97800}
-        ];
-        
-        const workModeData = [
-            {"period": "2020-22", "Remoto": 12931, "Hibrido": 12837, "Presencial": 12845}, {"period": "2023-24", "Remoto": 8450, "Hibrido": 8449, "Presencial": 8685}, 
-            {"period": "2025-26", "Remoto": 8624, "Hibrido": 8476, "Presencial": 8703}
-        ];
-
-        function exportAllDataToExcel() {
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(salaryData), "Salarios_Historicos");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(skillsCorrelationData), "Skills_Correlacion");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(seniorityData), "Seniority_Vs_Salarios");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(aiAdoptionData), "Adopcion_IA");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rolesDemandData), "Roles_Demanda");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(countryRolesData), "Salarios_Rol_y_Pais");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mapDataRAW), "Mapa_Geografico");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(workModeData), "Modalidad_Trabajo");
-            XLSX.writeFile(wb, "Dashboard_TFE_Mercado_Tech_2026.xlsx");
+            // 3. Disparar evento de resize para refrescar SVGs / Canvas ocultos
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 50);
         }
-
-        google.charts.load('current', { 'packages': ['geochart'] });
-        google.charts.setOnLoadCallback(drawRegionsMap);
-        function drawRegionsMap() {
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'País');
-            data.addColumn('number', 'Salario Promedio (USD)');
-            mapDataRAW.forEach(row => data.addRow([row.Pais, row.Salario_Promedio_USD]));
-            var options = { backgroundColor: 'transparent', datalessRegionColor: '#060913', defaultColor: '#1e293b', colorAxis: { colors: mapColors }, legend: { textStyle: { color: '#94a3b8' } } };
-            var chart = new google.visualization.GeoChart(document.getElementById('chart-map'));
-            chart.draw(data, options);
-            window.addEventListener('resize', () => chart.draw(data, options));
-        }
-
-        function onFilterChange() {
-            d3.selectAll(".d3-chart svg").remove();
-            renderAllD3();
-        }
-
-        function drawSkillsCorrelationChart() {
-            const selectedCategory = document.getElementById('categoryFilter').value;
-            const filteredData = selectedCategory === "ALL" 
-                ? skillsCorrelationData 
-                : skillsCorrelationData.filter(d => d.category === selectedCategory);
-
-            const container = document.getElementById('chart-skills-correlation');
-            const isMobile = window.innerWidth <= 600;
-            const margin = {top: 20, right: isMobile ? 15 : 30, bottom: isMobile ? 60 : 50, left: isMobile ? 45 : 60};
-            const width = container.clientWidth - margin.left - margin.right;
-            const height = container.clientHeight - margin.top - margin.bottom;
-            
-            const svg = d3.select("#chart-skills-correlation").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-            const x = d3.scaleLinear().domain([0, 13000]).range([0, width]);
-            const y = d3.scaleLinear().domain([70000, 150000]).range([height, 0]);
-
-            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(isMobile ? 4 : 8).tickFormat(d => d/1000 + "k"));
-            svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(isMobile ? 5 : 6).tickFormat(d => "$" + d/1000 + "k"));
-            svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
-            svg.append("g").attr("class", "grid").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).tickSize(-height).tickFormat(""));
-
-            svg.append("text").attr("text-anchor", "end").attr("x", width).attr("y", height + 35).attr("fill", "#94a3b8").style("font-size", isMobile ? "10px" : "12px").text("Volumen de Ofertas");
-            
-            svg.append("text")
-                .attr("text-anchor", "middle")
-                .attr("transform", "rotate(-90)")
-                .attr("y", isMobile ? -32 : -45)
-                .attr("x", -(height / 2))
-                .attr("fill", "#94a3b8")
-                .style("font-size", isMobile ? "10px" : "12px")
-                .text("Salario Estimado (USD)");
-
-            svg.append("line").attr("class", "quadrant-bg").attr("x1", x(6500)).attr("y1", 0).attr("x2", x(6500)).attr("y2", height);
-            svg.append("line").attr("class", "quadrant-bg").attr("x1", 0).attr("y1", y(110000)).attr("x2", width).attr("y2", y(110000));
-            
-            if (!isMobile) {
-                svg.append("text").attr("class", "quadrant-label").attr("x", x(12500)).attr("y", y(145000)).attr("text-anchor", "end").text("Core Cotizado");
-                svg.append("text").attr("class", "quadrant-label").attr("x", x(500)).attr("y", y(145000)).attr("text-anchor", "start").text("Nichos Premium");
-            }
-
-            const node = svg.append("g").selectAll("g").data(filteredData).join("g").attr("transform", d => `translate(${x(d.demand)},${y(d.salary)})`);
-
-            node.append("circle").attr("r", 0).attr("fill", d => colors[d.category]).attr("opacity", 0.8).attr("stroke", "#060913").attr("stroke-width", 2)
-                .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("opacity", 1).attr("r", 15); tooltip.style("opacity", 1).html(`<strong>${d.skill}</strong>Demanda: ${d.demand.toLocaleString()} ofertas<br>Salario Base: $${d.salary.toLocaleString()} USD<br><em>Clasificación: ${d.category}</em>`); }})
-                .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
-                .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("opacity", 0.8).attr("r", isMobile ? 8 : 12); tooltip.style("opacity", 0); }})
-                .transition().duration(1000).delay((d, i) => i * 100).attr("r", isMobile ? 8 : 12);
-
-            node.append("text").attr("dy", isMobile ? -12 : -16).attr("text-anchor", "middle").style("font-size", isMobile ? "9px" : "11px").style("fill", "#e2e8f0").style("font-weight", "500").text(d => d.skill)
-                .style("opacity", 0).transition().duration(1000).delay((d, i) => (i * 100) + 500).style("opacity", 1);
-        }
-
-        function drawSeniorityChart() {
-            const container = document.getElementById('chart-seniority');
-            const isMobile = window.innerWidth <= 600;
-            const margin = {top: 20, right: 20, bottom: 40, left: isMobile ? 45 : 55};
-            const width = container.clientWidth - margin.left - margin.right;
-            const height = container.clientHeight - margin.top - margin.bottom;
-            const svg = d3.select("#chart-seniority").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-            
-            const x = d3.scaleBand().domain(seniorityData.map(d => d.level)).range([0, width]).padding(0.3);
-            const y = d3.scaleLinear().domain([0, 160000]).range([height, 0]);
-
-            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x)).selectAll("text").style("font-size", isMobile ? "9px" : "11px");
-            svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(5).tickFormat(d => "$" + d/1000 + "k"));
-            svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
-
-            svg.selectAll("rect").data(seniorityData).join("rect")
-                .attr("x", d => x(d.level)).attr("width", x.bandwidth())
-                .attr("fill", "#a78bfa").attr("rx", 4)
-                .attr("y", height).attr("height", 0)
-                .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("fill", "#c4b5fd"); tooltip.style("opacity", 1).html(`<strong>${d.level}</strong>Mediana Salarial: $${d.mediana_usd.toLocaleString()} USD`); }})
-                .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
-                .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("fill", "#a78bfa"); tooltip.style("opacity", 0); }})
-                .transition().duration(1000).delay((d, i) => i * 150)
-                .attr("y", d => y(d.mediana_usd)).attr("height", d => height - y(d.mediana_usd));
-        }
-
-        function drawAIAdoptionChart() {
-            const container = document.getElementById('chart-ai-adoption');
-            const isMobile = window.innerWidth <= 600;
-            const margin = {top: 20, right: 15, bottom: 40, left: isMobile ? 100 : 135};
-            const width = container.clientWidth - margin.left - margin.right;
-            const height = container.clientHeight - margin.top - margin.bottom;
-            const svg = d3.select("#chart-ai-adoption").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-            
-            const x = d3.scaleLinear().domain([0, 50]).range([0, width]);
-            const y = d3.scaleBand().domain(aiAdoptionData.map(d => isMobile ? d.nivel_movil : d.nivel)).range([height, 0]).padding(0.25);
-
-            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(5).tickFormat(d => d + "%"));
-            svg.append("g").attr("class", "axis").call(d3.axisLeft(y)).selectAll("text").style("font-size", isMobile ? "9px" : "11px");
-            svg.append("g").attr("class", "grid").call(d3.axisBottom(x).tickSize(-height).tickFormat(""));
-
-            svg.selectAll("rect").data(aiAdoptionData).join("rect")
-                .attr("x", 0).attr("y", d => y(isMobile ? d.nivel_movil : d.nivel)).attr("height", y.bandwidth())
-                .attr("fill", "#10b981").attr("rx", 3).attr("width", 0)
-                .on("mouseover", function(e, d) { if(!isMobile) { d3.select(this).attr("fill", "#34d399"); tooltip.style("opacity", 1).html(`<strong>${d.nivel}</strong>Participación: ${d.porcentaje}% de desarrolladores`); }})
-                .on("mousemove", e => { if(!isMobile) tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 28) + "px"); })
-                .on("mouseleave", function() { if(!isMobile) { d3.select(this).attr("fill", "#10b981"); tooltip.style("opacity", 0); }})
-                .transition().duration(1000).delay((d, i) => i * 100)
-                .attr("width", d => x(d.porcentaje));
-        }
-
-        function drawRolesDemandChart() {
-            const selectedCategory = document.getElementById('categoryFilter').value;
-            const filteredRoles = selectedCategory === "ALL" 
-                ? rolesDemandData 
-                : rolesDemandData.filter(d => d.category === selectedCategory);
-
-            const container = document.getElementById('chart-roles-demand');
-            const isMobile = window.innerWidth <= 600;
-            const margin = {top: 10, right: 30, bottom: 20, left: isMobile ? 110 : 160};
-            const width = container.clientWidth - margin.left - margin.right;
-            const height = container.clientHeight - margin.top - margin.bottom;
-            const svg = d3.select("#chart-roles-demand").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-            
-            filteredRoles.sort((a, b) => a.count - b.count); 
-            const x = d3.scaleLinear().domain([0, d3.max(rolesDemandData, d => d.count) + 1500]).range([0, width]);
-            const y = d3.scaleBand().domain(filteredRoles.map(d => d.role)).range([height, 0]).padding(0.25);
-            
-            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(isMobile ? 3 : 8));
-            svg.append("g").attr("class", "axis").call(d3.axisLeft(y)).selectAll("text").style("font-size", isMobile ? "9px" : "11px");
-            
-            svg.selectAll("rect").data(filteredRoles).join("rect").attr("x", 0).attr("y", d => y(d.role)).attr("height", y.bandwidth()).attr("fill", "#10b981").attr("rx", 3).attr("width", 0)
-                .transition().duration(1000).delay((d, i) => i * 80).attr("width", d => x(d.count));
-        }
-
-        function drawCountryRolesChart() {
-            const selectedCategory = document.getElementById('categoryFilter').value;
-            const subgroups = selectedCategory === "ALL" ? ["Data & AI", "Software Dev", "Infra & Ops"] : [selectedCategory];
-
-            const container = document.getElementById('chart-country-roles');
-            const isMobile = window.innerWidth <= 600;
-            const margin = {top: isMobile ? 40 : 20, right: isMobile ? 10 : 120, bottom: 40, left: isMobile ? 40 : 60};
-            const width = container.clientWidth - margin.left - margin.right;
-            const height = container.clientHeight - margin.top - margin.bottom;
-            const svg = d3.select("#chart-country-roles").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-            
-            const groups = countryRolesData.map(d => d.country);
-            const x = d3.scaleBand().domain(groups).range([0, width]).padding([0.15]);
-            const xSubgroup = d3.scaleBand().domain(subgroups).range([0, x.bandwidth()]).padding([0.05]);
-            const y = d3.scaleLinear().domain([0, 260000]).range([height, 0]);
-            
-            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x)).selectAll("text").style("font-size", isMobile ? "9px" : "11px");
-            svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(isMobile ? 4 : 6).tickFormat(d => "$" + d / 1000 + "k"));
-            svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
-            
-            svg.append("g").selectAll("g").data(countryRolesData).join("g").attr("transform", d => `translate(${x(d.country)}, 0)`)
-                .selectAll("rect").data(d => subgroups.map(key => ({country: d.country, key: key, value: d[key]})))
-                .join("rect").attr("x", d => xSubgroup(d.key)).attr("fill", d => colors[d.key]).attr("rx", 2).attr("width", xSubgroup.bandwidth())
-                .attr("y", height).attr("height", 0)
-                .transition().duration(1000).delay((d, i) => i * 150).attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
-            
-            const legend = svg.append("g").attr("transform", isMobile ? `translate(0, -30)` : `translate(${width + 10}, 0)`);
-            subgroups.forEach((key, i) => {
-                if (isMobile) {
-                    legend.append("rect").attr("x", i * (width/subgroups.length)).attr("y", 0).attr("width", 10).attr("height", 10).attr("fill", colors[key]).attr("rx", 2);
-                    legend.append("text").attr("x", i * (width/subgroups.length) + 15).attr("y", 9).style("fill", "#cbd5e1").style("font-size", "9px").text(key.replace(' & ', '&'));
-                } else {
-                    legend.append("rect").attr("y", i * 20).attr("width", 12).attr("height", 12).attr("fill", colors[key]).attr("rx", 2);
-                    legend.append("text").attr("x", 20).attr("y", i * 20 + 10).style("fill", "#cbd5e1").style("font-size", "12px").text(key);
-                }
-            });
-        }
-
-        function drawSalaryChart() {
-            const selectedCategory = document.getElementById('categoryFilter').value;
-            const categoriesToDraw = selectedCategory === "ALL" ? ["Data & AI", "Software Dev", "Infra & Ops"] : [selectedCategory];
-
-            const container = document.getElementById('chart-salary');
-            const isMobile = window.innerWidth <= 600;
-            const margin = {top: isMobile ? 35 : 20, right: isMobile ? 15 : 100, bottom: 30, left: isMobile ? 45 : 50};
-            const width = container.clientWidth - margin.left - margin.right;
-            const height = container.clientHeight - margin.top - margin.bottom;
-            const svg = d3.select("#chart-salary").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-            const x = d3.scaleLinear().domain(d3.extent(salaryData, d => d.year)).range([0, width]);
-            const y = d3.scaleLinear().domain([85000, 105000]).range([height, 0]);
-            
-            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).tickFormat(d3.format("d")).ticks(isMobile ? 4 : 7));
-            svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(isMobile ? 4 : 5).tickFormat(d => "$" + d/1000 + "k"));
-            svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
-            
-            if (isMobile) {
-                const legend = svg.append("g").attr("transform", `translate(0, -25)`);
-                categoriesToDraw.forEach((cat, i) => {
-                    legend.append("rect").attr("x", i * (width/categoriesToDraw.length)).attr("y", 0).attr("width", 10).attr("height", 10).attr("fill", colors[cat]).attr("rx", 2);
-                    legend.append("text").attr("x", i * (width/categoriesToDraw.length) + 14).attr("y", 9).style("fill", "#cbd5e1").style("font-size", "9px").text(cat.replace(' & ', '&'));
-                });
-            }
-
-            categoriesToDraw.forEach((cat, index) => {
-                const path = svg.append("path").datum(salaryData).attr("fill", "none").attr("stroke", colors[cat]).attr("stroke-width", 3).attr("d", d3.line().curve(d3.curveMonotoneX).x(d => x(d.year)).y(d => y(d[cat])));
-                const totalLength = path.node().getTotalLength();
-                path.attr("stroke-dasharray", totalLength + " " + totalLength).attr("stroke-dashoffset", totalLength).transition().duration(2000).delay(index * 200).ease(d3.easeCubicInOut).attr("stroke-dashoffset", 0);
-            });
-        }
-
-        function drawWorkModeChart() {
-            const selectedWorkMode = document.getElementById('workModeFilter').value;
-            const subgroups = selectedWorkMode === "ALL" ? ["Remoto", "Hibrido", "Presencial"] : [selectedWorkMode];
-
-            const container = document.getElementById('chart-workmode');
-            const isMobile = window.innerWidth <= 600;
-            const margin = {top: isMobile ? 35 : 20, right: isMobile ? 10 : 20, bottom: 40, left: isMobile ? 35 : 50};
-            const width = container.clientWidth - margin.left - margin.right;
-            const height = container.clientHeight - margin.top - margin.bottom;
-            const svg = d3.select("#chart-workmode").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-            
-            const groups = workModeData.map(d => d.period);
-            const x = d3.scaleBand().domain(groups).range([0, width]).padding([0.2]);
-            const xSubgroup = d3.scaleBand().domain(subgroups).range([0, x.bandwidth()]).padding([0.05]);
-            const y = d3.scaleLinear().domain([0, 14000]).range([height, 0]);
-            
-            svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x)).selectAll("text").style("font-size", isMobile ? "10px" : "11px");
-            svg.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(4).tickFormat(d => d/1000 + "k"));
-            
-            svg.append("g").selectAll("g").data(workModeData).join("g").attr("transform", d => `translate(${x(d.period)}, 0)`).selectAll("rect").data(d => subgroups.map(key => ({period: d.period, key: key, value: d[key]})))
-                .join("rect").attr("x", d => xSubgroup(d.key)).attr("fill", d => colors[d.key]).attr("rx", 2).attr("width", xSubgroup.bandwidth()).attr("y", height).attr("height", 0)
-                .transition().duration(1000).delay((d, i) => i * 150).attr("y", d => y(d.value)).attr("height", d => height - y(d.value));
-                
-            const legend = svg.append("g").attr("transform", isMobile ? `translate(0, -25)` : `translate(${width - 80}, -10)`);
-            subgroups.forEach((key, i) => {
-                if(isMobile) {
-                    legend.append("rect").attr("x", i * (width/subgroups.length)).attr("y", 0).attr("width", 10).attr("height", 10).attr("fill", colors[key]).attr("rx", 2);
-                    legend.append("text").attr("x", i * (width/subgroups.length) + 14).attr("y", 9).style("fill", "#cbd5e1").style("font-size", "9px").text(key);
-                } else {
-                    legend.append("rect").attr("y", i * 15).attr("width", 10).attr("height", 10).attr("fill", colors[key]).attr("rx", 2);
-                    legend.append("text").attr("x", 15).attr("y", i * 15 + 9).style("fill", "#cbd5e1").style("font-size", "11px").text(key);
-                }
-            });
-        }
-
-        function renderAllD3() { 
-            drawSkillsCorrelationChart(); 
-            drawSeniorityChart(); 
-            drawAIAdoptionChart(); 
-            drawRolesDemandChart(); 
-            drawCountryRolesChart(); 
-            drawSalaryChart(); 
-            drawWorkModeChart(); 
-        }
-
-        renderAllD3();
-        window.addEventListener("resize", () => { d3.selectAll(".d3-chart svg").remove(); renderAllD3(); });
     </script>
+    <script src="script.js"></script>
 </body>
 </html>
